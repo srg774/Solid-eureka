@@ -1,10 +1,8 @@
-// Ensure that the script runs after the DOM is fully loaded
-window.onload = function() {
-    // Get the canvas and context
+window.onload = function () {
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Define player variables
+    // Player variables
     const playerWidth = 64;
     const playerHeight = 96;
     const playerSpeed = 5;
@@ -14,32 +12,54 @@ window.onload = function() {
     let isMovingLeft = false;
     let isMovingRight = false;
     let yVelocity = 0;
-    
+    let currentPlayerImage = null;
+
     // Load images
     const playerImageL = new Image();
     const playerImageR = new Image();
-    playerImageL.src = 'sprite_sheet_L.png'; // Update with the correct path if needed
-    playerImageR.src = 'sprite_sheet_R.png'; // Update with the correct path if needed
+    playerImageL.src = 'sprite_sheet_L.png';
+    playerImageR.src = 'sprite_sheet_R.png';
 
     // Ensure images are loaded before starting the game loop
-    playerImageL.onload = function() {
-        playerImageR.onload = function() {
-            // Start the game loop
+    playerImageL.onload = function () {
+        playerImageR.onload = function () {
+            currentPlayerImage = playerImageR; // Default to right-facing image
             gameLoop();
         };
     };
 
-    // Define player position
+    // Player position
     let playerX = canvas.width / 2 - playerWidth / 2;
-    let playerY = canvas.height - playerHeight;
+    let playerY = canvas.height - playerHeight - 10;
 
-    // Handle key presses
-    document.addEventListener('keydown', function(e) {
+    // Platforms
+    const platforms = [];
+    const platformWidth = 100;
+    const platformHeight = 10;
+    const platformCount = 10;
+    const platformGap = 80;
+
+    function generatePlatforms() {
+        for (let i = 0; i < platformCount; i++) {
+            platforms.push({
+                x: Math.random() * (canvas.width - platformWidth),
+                y: canvas.height - (i * platformGap) - platformHeight,
+            });
+        }
+    }
+
+    // Generate platforms at the start
+    generatePlatforms();
+
+    // Event listeners for keyboard controls
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'ArrowLeft') {
             isMovingLeft = true;
+            currentPlayerImage = playerImageL;
         }
         if (e.key === 'ArrowRight') {
             isMovingRight = true;
+            currentPlayerImage = playerImageR;
         }
         if (e.key === ' ' && !isJumping) {
             isJumping = true;
@@ -47,7 +67,7 @@ window.onload = function() {
         }
     });
 
-    document.addEventListener('keyup', function(e) {
+    document.addEventListener('keyup', function (e) {
         if (e.key === 'ArrowLeft') {
             isMovingLeft = false;
         }
@@ -56,29 +76,31 @@ window.onload = function() {
         }
     });
 
-    // Mobile controls
+    // Mobile touch controls
     const controls = {
         left: false,
         right: false,
         jump: false
     };
 
-    document.addEventListener('touchstart', function(e) {
+    document.addEventListener('touchstart', function (e) {
         const touch = e.touches[0];
         const touchX = touch.clientX;
         const touchY = touch.clientY;
-        // Example: simple control zones
-        if (touchX < canvas.width / 2) {
+
+        // Simple touch control zones
+        if (touchX < canvas.width / 3) {
             controls.left = true;
-        } else {
+            currentPlayerImage = playerImageL;
+        } else if (touchX > canvas.width * 2 / 3) {
             controls.right = true;
-        }
-        if (touchY < canvas.height / 2) {
+            currentPlayerImage = playerImageR;
+        } else if (touchY < canvas.height / 2) {
             controls.jump = true;
         }
     });
 
-    document.addEventListener('touchend', function(e) {
+    document.addEventListener('touchend', function (e) {
         controls.left = false;
         controls.right = false;
         controls.jump = false;
@@ -87,16 +109,10 @@ window.onload = function() {
     // Game loop
     function gameLoop() {
         // Update player position
-        if (isMovingLeft) {
+        if (isMovingLeft || controls.left) {
             playerX -= playerSpeed;
         }
-        if (isMovingRight) {
-            playerX += playerSpeed;
-        }
-        if (controls.left) {
-            playerX -= playerSpeed;
-        }
-        if (controls.right) {
+        if (isMovingRight || controls.right) {
             playerX += playerSpeed;
         }
         if (controls.jump && !isJumping) {
@@ -115,12 +131,50 @@ window.onload = function() {
             isJumping = false;
         }
 
-        // Draw background and player
+        // Check for platform collision
+        platforms.forEach(platform => {
+            if (playerX < platform.x + platformWidth &&
+                playerX + playerWidth > platform.x &&
+                playerY + playerHeight > platform.y &&
+                playerY + playerHeight < platform.y + platformHeight + yVelocity) {
+                playerY = platform.y - playerHeight;
+                yVelocity = 0;
+                isJumping = false;
+            }
+        });
+
+        // Keep player within screen bounds
+        if (playerX < 0) {
+            playerX = 0;
+        }
+        if (playerX + playerWidth > canvas.width) {
+            playerX = canvas.width - playerWidth;
+        }
+
+        // Clear the canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(playerImageR, 0, 0, playerWidth, playerHeight, playerX, playerY, playerWidth, playerHeight);
+
+        // Draw platforms
+        ctx.fillStyle = '#8B4513';
+        platforms.forEach(platform => {
+            ctx.fillRect(platform.x, platform.y, platformWidth, platformHeight);
+        });
+
+        // Draw player
+        ctx.drawImage(currentPlayerImage, 0, 0, playerWidth, playerHeight, playerX, playerY, playerWidth, playerHeight);
+
+        // Scroll platforms downward to create a jumping effect
+        platforms.forEach(platform => {
+            platform.y += 2;
+            if (platform.y > canvas.height) {
+                platform.y = -platformHeight;
+                platform.x = Math.random() * (canvas.width - platformWidth);
+            }
+        });
 
         // Request next frame
         requestAnimationFrame(gameLoop);
     }
 };
+
 
