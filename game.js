@@ -66,13 +66,15 @@ window.onload = function() {
                 height: blockHeight,
                 color: 'blue',
                 hit: false,
-                missed: false // New property to track missed blocks
+                missed: false
             };
             blocks.push(block);
         }
     }
 
     // Desktop Controls
+    let jumpRequested = false; // Track if jump is requested
+
     document.addEventListener('keydown', function(event) {
         if (event.key === 'ArrowLeft') {
             playerVelocityX = -playerSpeed;
@@ -81,19 +83,25 @@ window.onload = function() {
             playerVelocityX = playerSpeed;
             currentPlayerImage = playerImageRight;
         } else if (event.key === 'ArrowUp' || event.key === ' ') { // Jump on Up Arrow or Spacebar
-            jump();
+            if (!jumpRequested) {
+                jump();
+                jumpRequested = true; // Set flag to prevent long presses
+            }
         }
     });
 
     document.addEventListener('keyup', function(event) {
         if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
             playerVelocityX = 0;
+        } else if (event.key === 'ArrowUp' || event.key === ' ') { // Reset jump request on key release
+            jumpRequested = false;
         }
     });
 
     // Mobile Controls
     let isTouchingLeft = false;
     let isTouchingRight = false;
+    let jumpRequestedTouch = false; // Track if jump is requested by touch
 
     canvas.addEventListener('touchstart', function(e) {
         e.preventDefault();
@@ -103,13 +111,17 @@ window.onload = function() {
         } else {
             isTouchingRight = true;
         }
-        jump(); // Trigger jump on touch start
+        if (!jumpRequestedTouch) {
+            jump();
+            jumpRequestedTouch = true; // Set flag to prevent long presses
+        }
     });
 
     canvas.addEventListener('touchend', function(e) {
         isTouchingLeft = false;
         isTouchingRight = false;
         playerVelocityX = 0;
+        jumpRequestedTouch = false; // Reset jump request on touch end
     });
 
     canvas.addEventListener('touchmove', function(e) {
@@ -189,6 +201,7 @@ window.onload = function() {
         // Prevent player from moving out of bounds on top, left, and right
         if (playerX < 0) playerX = 0;
         if (playerX + playerWidth > canvas.width) playerX = canvas.width - playerWidth;
+        if (playerY < 0) playerY = 0; // Prevent player from going above the top
 
         // Move blocks and scroll screen
         blocks.forEach(block => {
