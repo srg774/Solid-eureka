@@ -3,9 +3,8 @@ window.onload = function() {
     const ctx = canvas.getContext('2d');
     const restartButton = document.getElementById('restartButton');
 
-    // Set canvas size
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // Set canvas size to fit the mobile screen
+    resizeCanvas();
 
     let isGameOver = false;
     let gameSpeed = 0.5;
@@ -16,7 +15,7 @@ window.onload = function() {
 
     const playerWidth = 30;
     const playerHeight = 30;
-    const playerSpeed = 2;
+    const playerSpeed = 4;
     const jumpStrength = 4;
     const maxSpeed = 5;
     let playerX, playerY;
@@ -68,15 +67,17 @@ window.onload = function() {
                 width: blockWidth,
                 height: blockHeight,
                 color: 'blue',
-                hit: false,
-                missed: false
+                hit: false
             };
             blocks.push(block);
         }
     }
 
+    // Variables to manage jump state
     let jumpRequested = false;
+    let jumpAllowed = true;
 
+    // Touch and keyboard controls
     document.addEventListener('keydown', function(event) {
         if (event.key === 'ArrowLeft') {
             playerVelocityX = -playerSpeed;
@@ -84,11 +85,9 @@ window.onload = function() {
         } else if (event.key === 'ArrowRight') {
             playerVelocityX = playerSpeed;
             currentPlayerImage = playerImageRight;
-        } else if (event.key === 'ArrowUp' || event.key === ' ') {
-            if (!jumpRequested) {
-                jump();
-                jumpRequested = true;
-            }
+        } else if ((event.key === 'ArrowUp' || event.key === ' ') && jumpAllowed) {
+            jump();
+            jumpAllowed = false;
         }
     });
 
@@ -96,25 +95,28 @@ window.onload = function() {
         if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
             playerVelocityX = 0;
         } else if (event.key === 'ArrowUp' || event.key === ' ') {
-            jumpRequested = false;
+            jumpAllowed = true;
         }
     });
 
     let isTouchingLeft = false;
     let isTouchingRight = false;
-    let jumpRequestedTouch = false;
 
     canvas.addEventListener('touchstart', function(e) {
         e.preventDefault();
         const touch = e.touches[0];
         if (touch.clientX < canvas.width / 2) {
             isTouchingLeft = true;
+            playerVelocityX = -playerSpeed;
+            currentPlayerImage = playerImageLeft;
         } else {
             isTouchingRight = true;
+            playerVelocityX = playerSpeed;
+            currentPlayerImage = playerImageRight;
         }
-        if (!jumpRequestedTouch) {
+        if (jumpAllowed) {
             jump();
-            jumpRequestedTouch = true;
+            jumpAllowed = false;
         }
     });
 
@@ -122,11 +124,7 @@ window.onload = function() {
         isTouchingLeft = false;
         isTouchingRight = false;
         playerVelocityX = 0;
-        jumpRequestedTouch = false;
-    });
-
-    canvas.addEventListener('touchmove', function(e) {
-        e.preventDefault();
+        jumpAllowed = true;
     });
 
     function updateControls() {
@@ -170,16 +168,12 @@ window.onload = function() {
 
         blocks.forEach(block => {
             if (block.y > canvas.height && !block.hit) {
-                block.missed = true;
                 isGameOver = true;
             }
         });
     }
 
-    const blockGenerationInterval = 1000;
-    let lastBlockGenerationTime = 0;
-
-    function gameLoop(timestamp) {
+    function gameLoop() {
         if (isGameOver) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = 'black';
@@ -187,7 +181,7 @@ window.onload = function() {
             ctx.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
             ctx.fillText('Score: ' + score, canvas.width / 2 - 50, canvas.height / 2 + 40);
             restartButton.style.display = 'block';
-            return; 
+            return;
         }
 
         updateControls();
@@ -206,17 +200,11 @@ window.onload = function() {
             block.y += gameSpeed;
         });
 
-        if (timestamp - lastBlockGenerationTime > blockGenerationInterval) {
-            generateBlock();
-            lastBlockGenerationTime = timestamp;
-        }
-
         if (blocks.length > 0 && blocks[blocks.length - 1].y > canvas.height) {
             blocks.shift();
         }
 
         checkGameOver();
-
         checkBlockCollision();
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -236,10 +224,10 @@ window.onload = function() {
         requestAnimationFrame(gameLoop);
     });
 
-    window.addEventListener('resize', function() {
+    window.addEventListener('resize', resizeCanvas);
+
+    function resizeCanvas() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        playerX = canvas.width / 2 - playerWidth / 2;
-        playerY = canvas.height / 2 - playerHeight / 2;
-    });
+    }
 };
