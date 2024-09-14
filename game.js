@@ -4,7 +4,7 @@ window.onload = function() {
     const restartButton = document.getElementById('restartButton');
 
     canvas.width = 800;
-    canvas.height = 600;
+    canvas.height = 440;
 
     let isGameOver = false;
     let gameSpeed = 0.5;
