@@ -4,16 +4,19 @@ window.onload = function () {
 
     // Game variables
     let isGameOver = false;
-    let gameSpeed = 1; // Initial scrolling speed
+    let gameSpeed = 0.5; // Slower initial scrolling speed
     let score = 0;
+    let gravity = 0.1; // Gravity to pull the player down
+    let playerVelocityY = 0; // Player's vertical velocity
+    let playerVelocityX = 0; // Player's horizontal velocity
 
     // Player variables
-    const playerWidth = 64;
-    const playerHeight = 64;
-    const playerSpeed = 5;
+    const playerWidth = 40; // Smaller player sprite
+    const playerHeight = 40;
+    const playerSpeed = 0.5; // Acceleration for flight controls
+    const maxSpeed = 3; // Max speed for the player
     let playerX, playerY;
-    let isMovingLeft = false;
-    let isMovingRight = false;
+    let isFlying = false;
 
     // Load player images for left and right movement
     const playerImageRight = new Image();
@@ -24,8 +27,9 @@ window.onload = function () {
 
     // Blocks
     const blocks = [];
-    const blockSize = 50;
-    const blockSpacing = 200; // Distance between blocks
+    const blockWidth = 60; // Wider blocks for easier landing
+    const blockHeight = 20;
+    const blockSpacing = 150; // More space between blocks
 
     // Ensure the player images are loaded before starting the game loop
     let imagesLoaded = 0;
@@ -40,17 +44,18 @@ window.onload = function () {
     // Reset game state
     function resetGame() {
         isGameOver = false;
-        gameSpeed = 1;
+        gameSpeed = 0.5;
         score = 0;
         playerX = canvas.width / 2 - playerWidth / 2;
-        playerY = canvas.height - playerHeight;
+        playerY = canvas.height - playerHeight - 10;
+        playerVelocityY = 0;
         blocks.length = 0; // Clear existing blocks
         generateInitialBlocks();
     }
 
     // Generate initial blocks
     function generateInitialBlocks() {
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 8; i++) {
             generateBlock(canvas.height - i * blockSpacing);
         }
     }
@@ -58,10 +63,10 @@ window.onload = function () {
     // Generate a new block at a specified y position
     function generateBlock(y) {
         const block = {
-            x: Math.random() * (canvas.width - blockSize),
+            x: Math.random() * (canvas.width - blockWidth),
             y: y,
-            width: blockSize,
-            height: blockSize,
+            width: blockWidth,
+            height: blockHeight,
             color: 'blue'
         };
         blocks.push(block);
@@ -69,45 +74,58 @@ window.onload = function () {
 
     // Event listeners for keyboard controls
     document.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowUp' || e.key === ' ') {
+            isFlying = true; // Start flying
+        }
         if (e.key === 'ArrowLeft') {
-            isMovingLeft = true;
+            playerVelocityX = -playerSpeed;
             currentPlayerImage = playerImageLeft;
         }
         if (e.key === 'ArrowRight') {
-            isMovingRight = true;
+            playerVelocityX = playerSpeed;
             currentPlayerImage = playerImageRight;
         }
     });
 
     document.addEventListener('keyup', function (e) {
-        if (e.key === 'ArrowLeft') isMovingLeft = false;
-        if (e.key === 'ArrowRight') isMovingRight = false;
+        if (e.key === 'ArrowUp' || e.key === ' ') {
+            isFlying = false; // Stop flying
+        }
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            playerVelocityX = 0; // Stop horizontal movement
+        }
     });
 
     // Mobile touch controls
     document.addEventListener('touchstart', handleTouch);
     document.addEventListener('touchmove', handleTouch);
+    document.addEventListener('touchend', function () {
+        // Stop movement on touch end
+        playerVelocityX = 0;
+        isFlying = false;
+    });
 
     function handleTouch(e) {
         const touch = e.touches[0];
         const touchX = touch.clientX;
+        const touchY = touch.clientY;
+
+        // Determine if the touch is in the upper half or lower half for flying
+        if (touchY < canvas.height / 2) {
+            isFlying = true;
+        } else {
+            isFlying = false;
+        }
 
         // Move player to the left or right based on touch position
         if (touchX < canvas.width / 2) {
-            isMovingLeft = true;
-            isMovingRight = false;
+            playerVelocityX = -playerSpeed;
             currentPlayerImage = playerImageLeft;
         } else {
-            isMovingRight = true;
-            isMovingLeft = false;
+            playerVelocityX = playerSpeed;
             currentPlayerImage = playerImageRight;
         }
     }
-
-    document.addEventListener('touchend', function () {
-        // Stop movement on touch end
-        isMovingLeft = isMovingRight = false;
-    });
 
     // Check collision with blocks
     function checkBlockCollision() {
@@ -115,12 +133,14 @@ window.onload = function () {
             const block = blocks[i];
             if (playerX < block.x + block.width &&
                 playerX + playerWidth > block.x &&
-                playerY < block.y + block.height &&
-                playerY + playerHeight > block.y) {
-                // Collision detected
+                playerY + playerHeight > block.y &&
+                playerY < block.y + block.height) {
+                // Collision detected - land on the block
+                playerVelocityY = 0; // Stop falling
+                playerY = block.y - playerHeight; // Place player on top of the block
                 block.color = 'green'; // Change color to indicate success
                 score += 1; // Increase score
-                gameSpeed += 0.1; // Gradually increase scrolling speed
+                gameSpeed += 0.05; // Gradually increase scrolling speed
                 generateBlock(block.y - blockSpacing); // Add a new block above
                 break;
             }
@@ -129,7 +149,7 @@ window.onload = function () {
 
     // Check if the player falls off the screen
     function checkGameOver() {
-        if (playerY > canvas.height || playerY + playerHeight < 0) {
+        if (playerY > canvas.height) {
             isGameOver = true;
         }
     }
@@ -144,9 +164,20 @@ window.onload = function () {
             return; // Stop the game loop
         }
 
+        // Apply gravity if not flying
+        if (!isFlying) {
+            playerVelocityY += gravity;
+        } else {
+            playerVelocityY -= 0.5; // Fly upward
+        }
+
+        // Cap the player's speed
+        if (playerVelocityY > maxSpeed) playerVelocityY = maxSpeed;
+        if (playerVelocityY < -maxSpeed) playerVelocityY = -maxSpeed;
+
         // Move the player
-        if (isMovingLeft) playerX -= playerSpeed;
-        if (isMovingRight) playerX += playerSpeed;
+        playerY += playerVelocityY;
+        playerX += playerVelocityX;
 
         // Prevent player from moving out of bounds
         if (playerX < 0) playerX = 0;
