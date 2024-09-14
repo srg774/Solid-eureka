@@ -9,14 +9,14 @@ window.onload = function() {
     let gameSpeed = 0.5;
     let score = 0;
     let gravity = 0.1;
-    let playerVelocityY = 2; // Start falling
+    let playerVelocityY = 0; // Start with no vertical movement
     let playerVelocityX = 0;
-    let canJump = false; // Track if the player can jump
+    let isJumping = false; // Track if the player is jumping
 
     const playerWidth = 30;
     const playerHeight = 30;
     const playerSpeed = 2;
-    const jumpStrength = 5;
+    const jumpStrength = 5; // Strength of the jump
     const maxSpeed = 5;
     let playerX, playerY;
 
@@ -46,8 +46,8 @@ window.onload = function() {
         score = 0;
         playerX = canvas.width / 2 - playerWidth / 2;
         playerY = -playerHeight; // Start position off the top of the screen
-        playerVelocityY = 2; // Start falling
-        canJump = true; // Allow jumping from the start
+        playerVelocityY = 0; // Start with no vertical movement
+        isJumping = false; // Initial state is not jumping
         blocks.length = 0;
         generateInitialBlocks();
     }
@@ -78,7 +78,7 @@ window.onload = function() {
         } else if (event.key === 'ArrowRight') {
             playerVelocityX = playerSpeed;
             currentPlayerImage = playerImageRight;
-        } else if (event.key === 'ArrowUp' || event.key === ' ') {
+        } else if (event.key === 'ArrowUp' || event.key === ' ') { // Jump on Up Arrow or Spacebar
             jump();
         }
     });
@@ -90,9 +90,9 @@ window.onload = function() {
     });
 
     function jump() {
-        if (canJump || playerVelocityY > 0) {
-            playerVelocityY = -jumpStrength;
-            canJump = false; // Disable jumping until player lands
+        if (!isJumping) {
+            playerVelocityY = -jumpStrength; // Apply upward force
+            isJumping = true; // Set jumping state
         }
     }
 
@@ -106,18 +106,18 @@ window.onload = function() {
                 playerY + playerHeight > block.y &&
                 playerY + playerHeight <= block.y + blockHeight + playerVelocityY
             ) {
-                playerVelocityY = 0;
-                playerY = block.y - playerHeight;
-                canJump = true; // Allow jumping again after landing
-                block.color = 'green';
+                playerVelocityY = 0; // Stop falling
+                playerY = block.y - playerHeight; // Place player on top of block
+                isJumping = false; // Reset jumping state
+                block.color = 'green'; // Change block color
                 score += 1;
                 gameSpeed += 0.05;
                 landed = true;
                 break;
             }
         }
-        if (!landed) {
-            canJump = false; // Player is in mid-air, can't jump
+        if (!landed && playerY + playerHeight < canvas.height) {
+            isJumping = true; // Allow continuous jumping if falling
         }
     }
 
@@ -186,6 +186,7 @@ window.onload = function() {
             playerVelocityX = playerSpeed;
             currentPlayerImage = playerImageRight;
         }
+        jump(); // Trigger jump on touch start
     });
 
     canvas.addEventListener('touchend', function(e) {
@@ -195,8 +196,5 @@ window.onload = function() {
     canvas.addEventListener('touchmove', function(e) {
         e.preventDefault(); // Prevent default scrolling
     });
-
-    canvas.addEventListener('touchstart', function(e) {
-        jump();
-    });
 };
+
