@@ -74,7 +74,6 @@ window.onload = function() {
     }
 
     // Variables to manage jump state
-    let jumpRequested = false;
     let jumpAllowed = true;
 
     // Touch and keyboard controls
@@ -196,26 +195,34 @@ window.onload = function() {
         if (playerX + playerWidth > canvas.width) playerX = canvas.width - playerWidth;
         if (playerY < 0) playerY = 0;
 
+        // Move and update blocks
         blocks.forEach(block => {
             block.y += gameSpeed;
         });
 
-        if (blocks.length > 0 && blocks[blocks.length - 1].y > canvas.height) {
+        // Remove blocks that have moved out of view
+        if (blocks.length > 0 && blocks[0].y > canvas.height) {
             blocks.shift();
         }
+
+        // Generate new blocks continuously
+        generateBlock();
 
         checkGameOver();
         checkBlockCollision();
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // Draw blocks
         blocks.forEach(block => {
             ctx.fillStyle = block.color;
             ctx.fillRect(block.x, block.y, block.width, block.height);
         });
 
+        // Draw player
         ctx.drawImage(currentPlayerImage, playerX, playerY, playerWidth, playerHeight);
 
+        // Request the next frame
         requestAnimationFrame(gameLoop);
     }
 
