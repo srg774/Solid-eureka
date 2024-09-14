@@ -21,11 +21,20 @@ window.onload = function () {
     playerImageR.src = 'sprite_sheet_R.png';
 
     // Ensure images are loaded before starting the game loop
+    let imagesLoaded = 0;
     playerImageL.onload = function () {
-        playerImageR.onload = function () {
+        imagesLoaded++;
+        if (imagesLoaded === 2) {
             currentPlayerImage = playerImageR; // Default to right-facing image
             gameLoop();
-        };
+        }
+    };
+    playerImageR.onload = function () {
+        imagesLoaded++;
+        if (imagesLoaded === 2) {
+            currentPlayerImage = playerImageR; // Default to right-facing image
+            gameLoop();
+        }
     };
 
     // Player position
@@ -38,6 +47,7 @@ window.onload = function () {
     const platformHeight = 10;
     const platformCount = 10;
     const platformGap = 80;
+    const platformSpeed = 2;
 
     function generatePlatforms() {
         for (let i = 0; i < platformCount; i++) {
@@ -55,11 +65,9 @@ window.onload = function () {
     document.addEventListener('keydown', function (e) {
         if (e.key === 'ArrowLeft') {
             isMovingLeft = true;
-            currentPlayerImage = playerImageL;
         }
         if (e.key === 'ArrowRight') {
             isMovingRight = true;
-            currentPlayerImage = playerImageR;
         }
         if (e.key === ' ' && !isJumping) {
             isJumping = true;
@@ -91,10 +99,8 @@ window.onload = function () {
         // Simple touch control zones
         if (touchX < canvas.width / 3) {
             controls.left = true;
-            currentPlayerImage = playerImageL;
         } else if (touchX > canvas.width * 2 / 3) {
             controls.right = true;
-            currentPlayerImage = playerImageR;
         } else if (touchY < canvas.height / 2) {
             controls.jump = true;
         }
@@ -111,9 +117,11 @@ window.onload = function () {
         // Update player position
         if (isMovingLeft || controls.left) {
             playerX -= playerSpeed;
+            currentPlayerImage = playerImageL;
         }
         if (isMovingRight || controls.right) {
             playerX += playerSpeed;
+            currentPlayerImage = playerImageR;
         }
         if (controls.jump && !isJumping) {
             isJumping = true;
@@ -138,8 +146,8 @@ window.onload = function () {
                 playerY + playerHeight > platform.y &&
                 playerY + playerHeight < platform.y + platformHeight + yVelocity) {
                 playerY = platform.y - playerHeight;
-                yVelocity = 0;
-                isJumping = false;
+                yVelocity = jumpPower; // Bounce upwards
+                isJumping = true;
             }
         });
 
@@ -165,7 +173,7 @@ window.onload = function () {
 
         // Scroll platforms downward to create a jumping effect
         platforms.forEach(platform => {
-            platform.y += 2;
+            platform.y += platformSpeed;
             if (platform.y > canvas.height) {
                 platform.y = -platformHeight;
                 platform.x = Math.random() * (canvas.width - platformWidth);
@@ -176,5 +184,6 @@ window.onload = function () {
         requestAnimationFrame(gameLoop);
     }
 };
+
 
 
