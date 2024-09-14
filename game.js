@@ -65,7 +65,8 @@ window.onload = function() {
                 width: blockWidth,
                 height: blockHeight,
                 color: 'blue',
-                hit: false
+                hit: false,
+                missed: false // New property to track missed blocks
             };
             blocks.push(block);
         }
@@ -155,9 +156,10 @@ window.onload = function() {
             isGameOver = true;
         }
 
-        // Check if any block has missed
+        // Check if any block has been missed
         blocks.forEach(block => {
             if (block.y > canvas.height && !block.hit) {
+                block.missed = true; // Mark the block as missed
                 isGameOver = true;
             }
         });
@@ -202,7 +204,7 @@ window.onload = function() {
             lastBlockGenerationTime = timestamp;
         }
 
-        // Remove blocks that are out of view and check for missed blocks
+        // Remove blocks that are out of view
         if (blocks.length > 0 && blocks[blocks.length - 1].y > canvas.height) {
             blocks.shift(); // Remove the block from the array
         }
