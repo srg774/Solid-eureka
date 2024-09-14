@@ -15,7 +15,7 @@ window.onload = function() {
     const playerWidth = 30;
     const playerHeight = 30;
     const playerSpeed = 2;
-    const jumpStrength = 4;
+    const jumpStrength = 4; // Reduced bounce strength
     const maxSpeed = 5;
     let playerX, playerY;
 
@@ -29,7 +29,6 @@ window.onload = function() {
     const blockWidth = 50;
     const blockHeight = 15;
     const blockSpacing = 200;
-    const blockVisibilityDuration = 2000; // Duration a block is visible in milliseconds
 
     let imagesLoaded = 0;
     playerImageRight.onload = playerImageLeft.onload = function() {
@@ -58,22 +57,65 @@ window.onload = function() {
         }
     }
 
-    function generateBlock(y) {
+    function generateBlock() {
         if (blocks.length === 0 || blocks[blocks.length - 1].y > blockSpacing) {
             const block = {
                 x: Math.random() * (canvas.width - blockWidth),
-                y: y,
+                y: -blockHeight,
                 width: blockWidth,
                 height: blockHeight,
-                color: 'blue',
-                hit: false,
-                spawnTime: Date.now()
+                color: 'blue'
             };
             blocks.push(block);
         }
     }
 
+    // Desktop Controls
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'ArrowLeft') {
+            playerVelocityX = -playerSpeed;
+            currentPlayerImage = playerImageLeft;
+        } else if (event.key === 'ArrowRight') {
+            playerVelocityX = playerSpeed;
+            currentPlayerImage = playerImageRight;
+        } else if (event.key === 'ArrowUp' || event.key === ' ') { // Jump on Up Arrow or Spacebar
+            jump();
+        }
+    });
+
+    document.addEventListener('keyup', function(event) {
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+            playerVelocityX = 0;
+        }
+    });
+
+    // Mobile Controls
+    let isTouchingLeft = false;
+    let isTouchingRight = false;
+
+    canvas.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        if (touch.clientX < canvas.width / 2) {
+            isTouchingLeft = true;
+        } else {
+            isTouchingRight = true;
+        }
+        jump(); // Trigger jump on touch start
+    });
+
+    canvas.addEventListener('touchend', function(e) {
+        isTouchingLeft = false;
+        isTouchingRight = false;
+        playerVelocityX = 0;
+    });
+
+    canvas.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+    });
+
     function updateControls() {
+        // Update mobile controls if no keyboard input is active
         if (playerVelocityX === 0) {
             if (isTouchingLeft) {
                 playerVelocityX = -playerSpeed;
@@ -97,39 +139,27 @@ window.onload = function() {
                 playerY + playerHeight > block.y &&
                 playerY < block.y + blockHeight
             ) {
-                if (!block.hit) {
-                    block.hit = true; // Mark block as hit
-                    playerVelocityY = -jumpStrength;
-                    playerY = block.y - playerHeight;
-                    block.color = 'green';
-                    score += 1;
-                    gameSpeed += 0.01;
-                }
+                // Bounce off the block
+                playerVelocityY = -jumpStrength;
+                playerY = block.y - playerHeight;
+                block.color = 'green';
+                score += 1;
+                // Gradually increase game speed
+                gameSpeed += 0.01;
             }
         });
     }
 
     function checkGameOver() {
-        const now = Date.now();
-        let blockMissed = false;
-
         blocks.forEach(block => {
             if (block.y > canvas.height && !block.hit) {
-                blockMissed = true;
-            }
-
-            if (now - block.spawnTime > blockVisibilityDuration && !block.hit && block.y <= canvas.height) {
-                blockMissed = true;
+                isGameOver = true;
+                ctx.fillStyle = 'black';
+                ctx.font = '30px Arial';
+                ctx.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
+                ctx.fillText('Score: ' + score, canvas.width / 2 - 50, canvas.height / 2 + 40);
             }
         });
-
-        if (blockMissed || playerY > canvas.height) {
-            isGameOver = true;
-            ctx.fillStyle = 'black';
-            ctx.font = '30px Arial';
-            ctx.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
-            ctx.fillText('Score: ' + score, canvas.width / 2 - 50, canvas.height / 2 + 40);
-        }
     }
 
     const blockGenerationInterval = 1000;
@@ -140,26 +170,33 @@ window.onload = function() {
             return;
         }
 
+        // Update mobile controls
         updateControls();
 
+        // Apply gravity
         playerVelocityY += gravity;
         if (playerVelocityY > maxSpeed) playerVelocityY = maxSpeed;
 
+        // Move the player
         playerY += playerVelocityY;
         playerX += playerVelocityX;
 
+        // Prevent player from moving out of bounds
         if (playerX < 0) playerX = 0;
         if (playerX + playerWidth > canvas.width) playerX = canvas.width - playerWidth;
 
+        // Move blocks and scroll screen
         blocks.forEach(block => {
             block.y += gameSpeed;
         });
 
+        // Generate new blocks as needed
         if (timestamp - lastBlockGenerationTime > blockGenerationInterval) {
-            generateBlock(canvas.height);
+            generateBlock();
             lastBlockGenerationTime = timestamp;
         }
 
+        // Remove blocks that are out of view
         if (blocks.length > 0 && blocks[blocks.length - 1].y > canvas.height) {
             blocks.shift();
         }
@@ -167,57 +204,19 @@ window.onload = function() {
         checkBlockCollision();
         checkGameOver();
 
+        // Clear the canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // Draw blocks
         blocks.forEach(block => {
             ctx.fillStyle = block.color;
             ctx.fillRect(block.x, block.y, block.width, block.height);
         });
 
+        // Draw player
         ctx.drawImage(currentPlayerImage, playerX, playerY, playerWidth, playerHeight);
 
+        // Request next frame
         requestAnimationFrame(gameLoop);
     }
-
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'ArrowLeft') {
-            playerVelocityX = -playerSpeed;
-            currentPlayerImage = playerImageLeft;
-        } else if (event.key === 'ArrowRight') {
-            playerVelocityX = playerSpeed;
-            currentPlayerImage = playerImageRight;
-        } else if (event.key === 'ArrowUp' || event.key === ' ') {
-            jump();
-        }
-    });
-
-    document.addEventListener('keyup', function(event) {
-        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-            playerVelocityX = 0;
-        }
-    });
-
-    let isTouchingLeft = false;
-    let isTouchingRight = false;
-
-    canvas.addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        const touch = e.touches[0];
-        if (touch.clientX < canvas.width / 2) {
-            isTouchingLeft = true;
-        } else {
-            isTouchingRight = true;
-        }
-        jump();
-    });
-
-    canvas.addEventListener('touchend', function(e) {
-        isTouchingLeft = false;
-        isTouchingRight = false;
-        playerVelocityX = 0;
-    });
-
-    canvas.addEventListener('touchmove', function(e) {
-        e.preventDefault();
-    });
 };
