@@ -15,7 +15,7 @@ window.onload = function() {
     const playerWidth = 30;
     const playerHeight = 30;
     const playerSpeed = 2;
-    const jumpStrength = 4; // Reduced bounce strength
+    const jumpStrength = 4;
     const maxSpeed = 5;
     let playerX, playerY;
 
@@ -65,7 +65,7 @@ window.onload = function() {
                 width: blockWidth,
                 height: blockHeight,
                 color: 'blue',
-                hit: false // Initialize as not hit
+                hit: false
             };
             blocks.push(block);
         }
@@ -116,7 +116,6 @@ window.onload = function() {
     });
 
     function updateControls() {
-        // Update mobile controls if no keyboard input is active
         if (playerVelocityX === 0) {
             if (isTouchingLeft) {
                 playerVelocityX = -playerSpeed;
@@ -140,13 +139,11 @@ window.onload = function() {
                 playerY + playerHeight > block.y &&
                 playerY < block.y + blockHeight
             ) {
-                // Bounce off the block
                 playerVelocityY = -jumpStrength;
                 playerY = block.y - playerHeight;
-                block.color = 'green'; // Change color to indicate it was hit
-                block.hit = true; // Mark block as hit
+                block.color = 'green'; 
+                block.hit = true; 
                 score += 1;
-                // Gradually increase game speed
                 gameSpeed += 0.01;
             }
         });
@@ -159,18 +156,7 @@ window.onload = function() {
             ctx.font = '30px Arial';
             ctx.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
             ctx.fillText('Score: ' + score, canvas.width / 2 - 50, canvas.height / 2 + 40);
-            return; // Stop further processing if game is over
         }
-
-        blocks.forEach(block => {
-            if (block.y > canvas.height && !block.hit) {
-                isGameOver = true;
-                ctx.fillStyle = 'black';
-                ctx.font = '30px Arial';
-                ctx.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
-                ctx.fillText('Score: ' + score, canvas.width / 2 - 50, canvas.height / 2 + 40);
-            }
-        });
     }
 
     const blockGenerationInterval = 1000;
@@ -181,38 +167,28 @@ window.onload = function() {
             return;
         }
 
-        // Update mobile controls
         updateControls();
 
-        // Apply gravity
         playerVelocityY += gravity;
         if (playerVelocityY > maxSpeed) playerVelocityY = maxSpeed;
 
-        // Move the player
         playerY += playerVelocityY;
         playerX += playerVelocityX;
 
         // Prevent player from moving out of bounds
         if (playerX < 0) playerX = 0;
         if (playerX + playerWidth > canvas.width) playerX = canvas.width - playerWidth;
-        if (playerY < 0) playerY = 0; // Prevent going above the top
-        if (playerY + playerHeight > canvas.height) { // Prevent going below the bottom
-            playerY = canvas.height - playerHeight; // Keep within bounds
-            playerVelocityY = 0; // Stop downward movement when touching bottom
-        }
 
         // Move blocks and scroll screen
         blocks.forEach(block => {
             block.y += gameSpeed;
         });
 
-        // Generate new blocks as needed
         if (timestamp - lastBlockGenerationTime > blockGenerationInterval) {
             generateBlock();
             lastBlockGenerationTime = timestamp;
         }
 
-        // Remove blocks that are out of view
         if (blocks.length > 0 && blocks[blocks.length - 1].y > canvas.height) {
             blocks.shift();
         }
@@ -220,19 +196,15 @@ window.onload = function() {
         checkBlockCollision();
         checkGameOver();
 
-        // Clear the canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Draw blocks
         blocks.forEach(block => {
             ctx.fillStyle = block.color;
             ctx.fillRect(block.x, block.y, block.width, block.height);
         });
 
-        // Draw player
         ctx.drawImage(currentPlayerImage, playerX, playerY, playerWidth, playerHeight);
 
-        // Request next frame
         requestAnimationFrame(gameLoop);
     }
 };
