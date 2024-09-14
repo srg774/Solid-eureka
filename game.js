@@ -8,14 +8,14 @@ window.onload = function() {
     let isGameOver = false;
     let gameSpeed = 0.5;
     let score = 0;
-    let gravity = 0.2; // Adjust gravity for a good falling effect
+    let gravity = 0.2;
     let playerVelocityY = 0;
     let playerVelocityX = 0;
 
     const playerWidth = 30;
     const playerHeight = 30;
     const playerSpeed = 2;
-    const jumpStrength = 8; // Strong enough for noticeable jumps
+    const jumpStrength = 8;
     const maxSpeed = 5;
     let playerX, playerY;
 
@@ -44,7 +44,7 @@ window.onload = function() {
         gameSpeed = 0.5;
         score = 0;
         playerX = canvas.width / 2 - playerWidth / 2;
-        playerY = canvas.height / 2 - playerHeight / 2; // Start position in the center
+        playerY = canvas.height / 2 - playerHeight / 2;
         playerVelocityY = 0;
         playerVelocityX = 0;
         blocks.length = 0;
@@ -89,31 +89,25 @@ window.onload = function() {
     });
 
     function jump() {
-        playerVelocityY = -jumpStrength; // Apply upward force
+        playerVelocityY = -jumpStrength;
     }
 
     function checkBlockCollision() {
-        let landed = false;
-        for (let i = 0; i < blocks.length; i++) {
-            const block = blocks[i];
+        blocks.forEach(block => {
             if (
                 playerX + playerWidth > block.x &&
                 playerX < block.x + blockWidth &&
                 playerY + playerHeight > block.y &&
-                playerY + playerHeight <= block.y + blockHeight + playerVelocityY
+                playerY < block.y + blockHeight
             ) {
-                playerVelocityY = 0; // Stop vertical movement
-                playerY = block.y - playerHeight; // Place player on top of block
-                block.color = 'green'; // Change block color
+                // Bounce off the block
+                playerVelocityY = -jumpStrength;
+                playerY = block.y - playerHeight;
+                block.color = 'green';
                 score += 1;
                 gameSpeed += 0.05;
-                landed = true;
-                break;
             }
-        }
-        if (!landed && playerY + playerHeight < canvas.height) {
-            // Ensure the player can still jump if falling
-        }
+        });
     }
 
     function checkGameOver() {
@@ -158,7 +152,7 @@ window.onload = function() {
         }
 
         // Remove blocks that are out of view
-        if (blocks.length > 0 && blocks[0].y > canvas.height) {
+        if (blocks.length > 0 && blocks[blocks.length - 1].y > canvas.height) {
             blocks.shift();
         }
 
@@ -182,7 +176,7 @@ window.onload = function() {
     }
 
     canvas.addEventListener('touchstart', function(e) {
-        e.preventDefault(); // Prevent default touch behavior
+        e.preventDefault();
         jump(); // Trigger jump on touch start
     });
 
@@ -191,6 +185,6 @@ window.onload = function() {
     });
 
     canvas.addEventListener('touchmove', function(e) {
-        e.preventDefault(); // Prevent default scrolling
+        e.preventDefault();
     });
 };
