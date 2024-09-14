@@ -2,8 +2,8 @@ window.onload = function() {
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    canvas.width = 480;
-    canvas.height = 800;
+    canvas.width = 440; // Match with your HTML canvas width
+    canvas.height = 800; // Match with your HTML canvas height
 
     let isGameOver = false;
     let gameSpeed = 0.5;
@@ -49,6 +49,7 @@ window.onload = function() {
         playerVelocityX = 0;
         blocks.length = 0;
         generateInitialBlocks();
+        document.getElementById('restartButton').style.display = 'none'; // Hide the restart button
     }
 
     function generateInitialBlocks() {
@@ -187,7 +188,8 @@ window.onload = function() {
             ctx.font = '30px Arial';
             ctx.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
             ctx.fillText('Score: ' + score, canvas.width / 2 - 50, canvas.height / 2 + 40);
-            return; // Stop further processing
+            document.getElementById('restartButton').style.display = 'block'; // Show the restart button
+            return;
         }
 
         updateControls();
@@ -198,49 +200,4 @@ window.onload = function() {
         playerY += playerVelocityY;
         playerX += playerVelocityX;
 
-        // Prevent player from moving out of bounds on top, left, and right
-        if (playerX < 0) playerX = 0;
-        if (playerX + playerWidth > canvas.width) playerX = canvas.width - playerWidth;
-        if (playerY < 0) playerY = 0; // Prevent player from going above the top
-
-        // Move blocks and scroll screen
-        blocks.forEach(block => {
-            block.y += gameSpeed;
-        });
-
-        // Check game over conditions
-        checkGameOver();
-
-        // Generate new blocks as needed
-        if (timestamp - lastBlockGenerationTime > blockGenerationInterval) {
-            generateBlock();
-            lastBlockGenerationTime = timestamp;
-        }
-
-        // Remove blocks that are out of view
-        if (blocks.length > 0 && blocks[blocks.length - 1].y > canvas.height) {
-            blocks.shift(); // Remove the block from the array
-        }
-
-        // Check if any block that has been removed was missed
-        checkGameOver();
-
-        // Check collisions with remaining blocks
-        checkBlockCollision();
-
-        // Clear the canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Draw blocks
-        blocks.forEach(block => {
-            ctx.fillStyle = block.color;
-            ctx.fillRect(block.x, block.y, block.width, block.height);
-        });
-
-        // Draw player
-        ctx.drawImage(currentPlayerImage, playerX, playerY, playerWidth, playerHeight);
-
-        // Request next frame
-        requestAnimationFrame(gameLoop);
-    }
-};
+        // Prevent pl
