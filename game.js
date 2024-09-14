@@ -2,7 +2,7 @@ window.onload = function() {
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    canvas.width = 440;
+    canvas.width = 480;
     canvas.height = 800;
 
     let isGameOver = false;
@@ -66,7 +66,8 @@ window.onload = function() {
                 y: -blockHeight,
                 width: blockWidth,
                 height: blockHeight,
-                color: 'blue'
+                color: 'blue',
+                missed: false // Track if the block is missed
             };
             blocks.push(block);
         }
@@ -148,20 +149,14 @@ window.onload = function() {
                 score += 1;
                 // Gradually increase game speed
                 gameSpeed += 0.01;
-                missedBlocks = 0; // Reset missed blocks count
+                block.missed = false; // Reset missed status on successful hit
             }
         });
     }
 
     function checkGameOver() {
-        // End game if a block is missed
-        if (missedBlocks >= 3) {
-            isGameOver = true;
-            ctx.fillStyle = 'black';
-            ctx.font = '30px Arial';
-            ctx.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
-            ctx.fillText('Score: ' + score, canvas.width / 2 - 50, canvas.height / 2 + 40);
-        } else if (playerY > canvas.height) {
+        // End game if a missed block has completely scrolled off the screen
+        if (missedBlocks > 0 && blocks.every(block => block.y > canvas.height)) {
             isGameOver = true;
             ctx.fillStyle = 'black';
             ctx.font = '30px Arial';
@@ -196,6 +191,11 @@ window.onload = function() {
         // Move blocks and scroll screen
         blocks.forEach(block => {
             block.y += gameSpeed;
+            // Mark block as missed if it goes off screen
+            if (block.y > canvas.height && !block.missed) {
+                block.missed = true;
+                missedBlocks++; // Increment missed blocks count
+            }
         });
 
         // Generate new blocks as needed
@@ -205,10 +205,7 @@ window.onload = function() {
         }
 
         // Remove blocks that are out of view
-        if (blocks.length > 0 && blocks[blocks.length - 1].y > canvas.height) {
-            blocks.shift();
-            missedBlocks++; // Increment missed blocks count
-        }
+        blocks = blocks.filter(block => block.y <= canvas.height);
 
         checkBlockCollision();
         checkGameOver();
