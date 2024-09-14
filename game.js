@@ -80,7 +80,6 @@ window.onload = function() {
 
     // Event listeners for keyboard controls
     document.addEventListener('keydown', function(event) {
-        console.log('Key down:', event.key); // Debugging output
         if (event.key === 'ArrowLeft') {
             playerVelocityX = -playerSpeed;
             currentPlayerImage = playerImageLeft; // Switch to left image
@@ -91,10 +90,43 @@ window.onload = function() {
     });
 
     document.addEventListener('keyup', function(event) {
-        console.log('Key up:', event.key); // Debugging output
         if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
             playerVelocityX = 0;
         }
+    });
+
+    // Add touch controls for mobile devices
+    const leftButton = document.createElement('button');
+    leftButton.innerHTML = 'Left';
+    leftButton.style.position = 'absolute';
+    leftButton.style.bottom = '20px';
+    leftButton.style.left = '20px';
+    document.body.appendChild(leftButton);
+
+    const rightButton = document.createElement('button');
+    rightButton.innerHTML = 'Right';
+    rightButton.style.position = 'absolute';
+    rightButton.style.bottom = '20px';
+    rightButton.style.right = '20px';
+    document.body.appendChild(rightButton);
+
+    // Event listeners for touch controls
+    leftButton.addEventListener('touchstart', function() {
+        playerVelocityX = -playerSpeed;
+        currentPlayerImage = playerImageLeft;
+    });
+
+    leftButton.addEventListener('touchend', function() {
+        playerVelocityX = 0;
+    });
+
+    rightButton.addEventListener('touchstart', function() {
+        playerVelocityX = playerSpeed;
+        currentPlayerImage = playerImageRight;
+    });
+
+    rightButton.addEventListener('touchend', function() {
+        playerVelocityX = 0;
     });
 
     // Check for collisions more efficiently
@@ -185,3 +217,4 @@ window.onload = function() {
         requestAnimationFrame(gameLoop);
     }
 };
+
