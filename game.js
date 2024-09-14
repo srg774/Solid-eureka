@@ -2,6 +2,10 @@ window.onload = function () {
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
+    // Adjust canvas size for portrait mode
+    canvas.width = 480; // Adjust width for portrait mode
+    canvas.height = 800; // Adjust height for portrait mode
+
     // Game variables
     let isGameOver = false;
     let gameSpeed = 0.5; // Slower initial scrolling speed
@@ -11,10 +15,10 @@ window.onload = function () {
     let playerVelocityX = 0; // Player's horizontal velocity
 
     // Player variables
-    const playerWidth = 40; // Smaller player sprite
-    const playerHeight = 40;
+    const playerWidth = 30; // Smaller player sprite for mobile
+    const playerHeight = 30;
     const playerSpeed = 0.5; // Acceleration for flight controls
-    const maxSpeed = 3; // Max speed for the player
+    const maxSpeed = 2; // Max speed for the player
     let playerX, playerY;
     let isFlying = false;
 
@@ -27,9 +31,9 @@ window.onload = function () {
 
     // Blocks
     const blocks = [];
-    const blockWidth = 60; // Wider blocks for easier landing
-    const blockHeight = 20;
-    const blockSpacing = 150; // More space between blocks
+    const blockWidth = 50; // Adjust block size for mobile
+    const blockHeight = 15;
+    const blockSpacing = 150; // Space between blocks
 
     // Ensure the player images are loaded before starting the game loop
     let imagesLoaded = 0;
@@ -62,14 +66,16 @@ window.onload = function () {
 
     // Generate a new block at a specified y position
     function generateBlock(y) {
-        const block = {
-            x: Math.random() * (canvas.width - blockWidth),
-            y: y,
-            width: blockWidth,
-            height: blockHeight,
-            color: 'blue'
-        };
-        blocks.push(block);
+        if (y > canvas.height / 2) {
+            const block = {
+                x: Math.random() * (canvas.width - blockWidth),
+                y: y,
+                width: blockWidth,
+                height: blockHeight,
+                color: 'blue'
+            };
+            blocks.push(block);
+        }
     }
 
     // Event listeners for keyboard controls
@@ -188,13 +194,6 @@ window.onload = function () {
             block.y += gameSpeed;
         });
 
-        // Remove blocks that have moved off the screen
-        blocks.forEach((block, index) => {
-            if (block.y > canvas.height) {
-                blocks.splice(index, 1);
-            }
-        });
-
         // Check for collisions
         checkBlockCollision();
         checkGameOver();
@@ -215,3 +214,4 @@ window.onload = function () {
         requestAnimationFrame(gameLoop);
     }
 };
+
