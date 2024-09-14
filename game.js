@@ -3,8 +3,9 @@ window.onload = function() {
     const ctx = canvas.getContext('2d');
     const restartButton = document.getElementById('restartButton');
 
-    canvas.width = 800;
-    canvas.height = 600;
+    // Set canvas size
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
     let isGameOver = false;
     let gameSpeed = 0.5;
@@ -50,7 +51,7 @@ window.onload = function() {
         playerVelocityX = 0;
         blocks.length = 0;
         generateInitialBlocks();
-        restartButton.style.display = 'none'; // Hide the restart button
+        restartButton.style.display = 'none';
     }
 
     function generateInitialBlocks() {
@@ -83,7 +84,7 @@ window.onload = function() {
         } else if (event.key === 'ArrowRight') {
             playerVelocityX = playerSpeed;
             currentPlayerImage = playerImageRight;
-        } else if (event.key === 'ArrowUp' || event.key === ' ') { 
+        } else if (event.key === 'ArrowUp' || event.key === ' ') {
             if (!jumpRequested) {
                 jump();
                 jumpRequested = true;
@@ -185,7 +186,7 @@ window.onload = function() {
             ctx.font = '30px Arial';
             ctx.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
             ctx.fillText('Score: ' + score, canvas.width / 2 - 50, canvas.height / 2 + 40);
-            restartButton.style.display = 'block'; // Show the restart button
+            restartButton.style.display = 'block';
             return; 
         }
 
@@ -233,5 +234,12 @@ window.onload = function() {
     restartButton.addEventListener('click', function() {
         resetGame();
         requestAnimationFrame(gameLoop);
+    });
+
+    window.addEventListener('resize', function() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        playerX = canvas.width / 2 - playerWidth / 2;
+        playerY = canvas.height / 2 - playerHeight / 2;
     });
 };
