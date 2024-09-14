@@ -3,7 +3,7 @@ window.onload = function() {
     const ctx = canvas.getContext('2d');
 
     // Set canvas size for mobile
-    canvas.width = 360;  // Reduced width for mobile
+    canvas.width = 320;  // Reduced width for mobile
     canvas.height = 640; // Adjust height accordingly
 
     let isGameOver = false;
