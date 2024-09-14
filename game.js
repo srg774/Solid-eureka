@@ -3,6 +3,9 @@ window.onload = function() {
     const ctx = canvas.getContext('2d');
     const restartButton = document.getElementById('restartButton');
 
+    canvas.width = 800;
+    canvas.height = 600;
+
     let isGameOver = false;
     let gameSpeed = 0.5;
     let score = 0;
@@ -12,7 +15,7 @@ window.onload = function() {
 
     const playerWidth = 30;
     const playerHeight = 30;
-    const playerSpeed = 4;
+    const playerSpeed = 2;
     const jumpStrength = 4;
     const maxSpeed = 5;
     let playerX, playerY;
@@ -32,16 +35,10 @@ window.onload = function() {
     playerImageRight.onload = playerImageLeft.onload = function() {
         imagesLoaded++;
         if (imagesLoaded === 2) {
-            resizeCanvas();
             resetGame();
             requestAnimationFrame(gameLoop);
         }
     };
-
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
 
     function resetGame() {
         isGameOver = false;
@@ -53,26 +50,83 @@ window.onload = function() {
         playerVelocityX = 0;
         blocks.length = 0;
         generateInitialBlocks();
-        restartButton.style.display = 'none';
+        restartButton.style.display = 'none'; // Hide the restart button
     }
 
     function generateInitialBlocks() {
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 5; i++) {
             generateBlock(canvas.height - i * blockSpacing);
         }
     }
 
-    function generateBlock(yPosition) {
-        const block = {
-            x: Math.random() * (canvas.width - blockWidth),
-            y: yPosition,
-            width: blockWidth,
-            height: blockHeight,
-            color: 'blue',
-            hit: false
-        };
-        blocks.push(block);
+    function generateBlock() {
+        if (blocks.length === 0 || blocks[blocks.length - 1].y > blockSpacing) {
+            const block = {
+                x: Math.random() * (canvas.width - blockWidth),
+                y: -blockHeight,
+                width: blockWidth,
+                height: blockHeight,
+                color: 'blue',
+                hit: false,
+                missed: false
+            };
+            blocks.push(block);
+        }
     }
+
+    let jumpRequested = false;
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'ArrowLeft') {
+            playerVelocityX = -playerSpeed;
+            currentPlayerImage = playerImageLeft;
+        } else if (event.key === 'ArrowRight') {
+            playerVelocityX = playerSpeed;
+            currentPlayerImage = playerImageRight;
+        } else if (event.key === 'ArrowUp' || event.key === ' ') { 
+            if (!jumpRequested) {
+                jump();
+                jumpRequested = true;
+            }
+        }
+    });
+
+    document.addEventListener('keyup', function(event) {
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+            playerVelocityX = 0;
+        } else if (event.key === 'ArrowUp' || event.key === ' ') {
+            jumpRequested = false;
+        }
+    });
+
+    let isTouchingLeft = false;
+    let isTouchingRight = false;
+    let jumpRequestedTouch = false;
+
+    canvas.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        if (touch.clientX < canvas.width / 2) {
+            isTouchingLeft = true;
+        } else {
+            isTouchingRight = true;
+        }
+        if (!jumpRequestedTouch) {
+            jump();
+            jumpRequestedTouch = true;
+        }
+    });
+
+    canvas.addEventListener('touchend', function(e) {
+        isTouchingLeft = false;
+        isTouchingRight = false;
+        playerVelocityX = 0;
+        jumpRequestedTouch = false;
+    });
+
+    canvas.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+    });
 
     function updateControls() {
         if (playerVelocityX === 0) {
@@ -100,8 +154,8 @@ window.onload = function() {
             ) {
                 playerVelocityY = -jumpStrength;
                 playerY = block.y - playerHeight;
-                block.color = 'green';
-                block.hit = true;
+                block.color = 'green'; 
+                block.hit = true; 
                 score += 1;
                 gameSpeed += 0.01;
             }
@@ -115,20 +169,24 @@ window.onload = function() {
 
         blocks.forEach(block => {
             if (block.y > canvas.height && !block.hit) {
+                block.missed = true;
                 isGameOver = true;
             }
         });
     }
 
-    function gameLoop() {
+    const blockGenerationInterval = 1000;
+    let lastBlockGenerationTime = 0;
+
+    function gameLoop(timestamp) {
         if (isGameOver) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = 'black';
             ctx.font = '30px Arial';
             ctx.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
             ctx.fillText('Score: ' + score, canvas.width / 2 - 50, canvas.height / 2 + 40);
-            restartButton.style.display = 'block';
-            return;
+            restartButton.style.display = 'block'; // Show the restart button
+            return; 
         }
 
         updateControls();
@@ -143,22 +201,21 @@ window.onload = function() {
         if (playerX + playerWidth > canvas.width) playerX = canvas.width - playerWidth;
         if (playerY < 0) playerY = 0;
 
-        // Move blocks and check if they need to be removed or regenerated
         blocks.forEach(block => {
             block.y += gameSpeed;
         });
 
-        // Remove blocks that have fallen off the screen
-        if (blocks.length > 0 && blocks[0].y > canvas.height) {
+        if (timestamp - lastBlockGenerationTime > blockGenerationInterval) {
+            generateBlock();
+            lastBlockGenerationTime = timestamp;
+        }
+
+        if (blocks.length > 0 && blocks[blocks.length - 1].y > canvas.height) {
             blocks.shift();
         }
 
-        // Generate a new block if there are fewer than 3 blocks
-        if (blocks.length < 3) {
-            generateBlock(canvas.height);
-        }
-
         checkGameOver();
+
         checkBlockCollision();
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -170,10 +227,6 @@ window.onload = function() {
 
         ctx.drawImage(currentPlayerImage, playerX, playerY, playerWidth, playerHeight);
 
-        ctx.fillStyle = 'black';
-        ctx.font = '20px Arial';
-        ctx.fillText('Score: ' + score, 10, 30);
-
         requestAnimationFrame(gameLoop);
     }
 
@@ -181,57 +234,4 @@ window.onload = function() {
         resetGame();
         requestAnimationFrame(gameLoop);
     });
-
-    window.addEventListener('resize', resizeCanvas);
-
-    let isTouchingLeft = false;
-    let isTouchingRight = false;
-
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'ArrowLeft') {
-            playerVelocityX = -playerSpeed;
-            currentPlayerImage = playerImageLeft;
-        } else if (event.key === 'ArrowRight') {
-            playerVelocityX = playerSpeed;
-            currentPlayerImage = playerImageRight;
-        } else if ((event.key === 'ArrowUp' || event.key === ' ') && jumpAllowed) {
-            jump();
-            jumpAllowed = false;
-        }
-    });
-
-    document.addEventListener('keyup', function(event) {
-        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-            playerVelocityX = 0;
-        } else if (event.key === 'ArrowUp' || event.key === ' ') {
-            jumpAllowed = true;
-        }
-    });
-
-    canvas.addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        const touch = e.touches[0];
-        if (touch.clientX < canvas.width / 2) {
-            isTouchingLeft = true;
-            playerVelocityX = -playerSpeed;
-            currentPlayerImage = playerImageLeft;
-        } else {
-            isTouchingRight = true;
-            playerVelocityX = playerSpeed;
-            currentPlayerImage = playerImageRight;
-        }
-        if (jumpAllowed) {
-            jump();
-            jumpAllowed = false;
-        }
-    });
-
-    canvas.addEventListener('touchend', function(e) {
-        isTouchingLeft = false;
-        isTouchingRight = false;
-        playerVelocityX = 0;
-        jumpAllowed = true;
-    });
-
-    let jumpAllowed = true; // Initialize jumpAllowed
 };
