@@ -80,6 +80,7 @@ window.onload = function() {
 
     // Event listeners for keyboard controls
     document.addEventListener('keydown', function(event) {
+        console.log('Key down:', event.key); // Debugging output
         if (event.key === 'ArrowLeft') {
             playerVelocityX = -playerSpeed;
             currentPlayerImage = playerImageLeft; // Switch to left image
@@ -90,6 +91,7 @@ window.onload = function() {
     });
 
     document.addEventListener('keyup', function(event) {
+        console.log('Key up:', event.key); // Debugging output
         if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
             playerVelocityX = 0;
         }
