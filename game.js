@@ -2,8 +2,9 @@ window.onload = function() {
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    canvas.width = 480;
-    canvas.height = 800;
+    // Set canvas size for mobile
+    canvas.width = 360;  // Reduced width for mobile
+    canvas.height = 640; // Adjust height accordingly
 
     let isGameOver = false;
     let gameSpeed = 0.5;
@@ -12,11 +13,11 @@ window.onload = function() {
     let playerVelocityY = 0;
     let playerVelocityX = 0;
 
-    const playerWidth = 30;
-    const playerHeight = 30;
-    const playerSpeed = 2;
-    const jumpStrength = 4; // Reduced bounce strength
-    const maxSpeed = 5;
+    const playerWidth = 20;   // Adjusted player size
+    const playerHeight = 20;  // Adjusted player size
+    const playerSpeed = 1.5;  // Adjusted player speed
+    const jumpStrength = 2;   // Reduced bounce strength
+    const maxSpeed = 3;
     let playerX, playerY;
 
     const playerImageRight = new Image();
@@ -26,9 +27,9 @@ window.onload = function() {
     let currentPlayerImage = playerImageRight;
 
     const blocks = [];
-    const blockWidth = 50;
-    const blockHeight = 15;
-    const blockSpacing = 200;
+    const blockWidth = 30;   // Adjusted block size
+    const blockHeight = 10;  // Adjusted block size
+    const blockSpacing = 150; // Adjusted block spacing
 
     let imagesLoaded = 0;
     playerImageRight.onload = playerImageLeft.onload = function() {
@@ -218,6 +219,7 @@ window.onload = function() {
         requestAnimationFrame(gameLoop);
     }
 };
+
 
 
 
