@@ -114,15 +114,16 @@ window.onload = function() {
         e.preventDefault();
     });
 
-    function updateMobileControls() {
-        if (isTouchingLeft) {
-            playerVelocityX = -playerSpeed;
-            currentPlayerImage = playerImageLeft;
-        } else if (isTouchingRight) {
-            playerVelocityX = playerSpeed;
-            currentPlayerImage = playerImageRight;
-        } else {
-            playerVelocityX = 0;
+    function updateControls() {
+        // Update mobile controls if no keyboard input is active
+        if (playerVelocityX === 0) {
+            if (isTouchingLeft) {
+                playerVelocityX = -playerSpeed;
+                currentPlayerImage = playerImageLeft;
+            } else if (isTouchingRight) {
+                playerVelocityX = playerSpeed;
+                currentPlayerImage = playerImageRight;
+            }
         }
     }
 
@@ -167,8 +168,8 @@ window.onload = function() {
             return;
         }
 
-        // Update mobile controls
-        updateMobileControls();
+        // Update controls
+        updateControls();
 
         // Apply gravity
         playerVelocityY += gravity;
@@ -217,5 +218,6 @@ window.onload = function() {
         requestAnimationFrame(gameLoop);
     }
 };
+
 
 
