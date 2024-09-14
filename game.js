@@ -1,9 +1,10 @@
 window.onload = function() {
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
+    const restartButton = document.getElementById('restartButton');
 
-    canvas.width = 440; // Match with your HTML canvas width
-    canvas.height = 800; // Match with your HTML canvas height
+    canvas.width = 800;
+    canvas.height = 600;
 
     let isGameOver = false;
     let gameSpeed = 0.5;
@@ -49,7 +50,7 @@ window.onload = function() {
         playerVelocityX = 0;
         blocks.length = 0;
         generateInitialBlocks();
-        document.getElementById('restartButton').style.display = 'none'; // Hide the restart button
+        restartButton.style.display = 'none'; // Hide the restart button
     }
 
     function generateInitialBlocks() {
@@ -73,8 +74,7 @@ window.onload = function() {
         }
     }
 
-    // Desktop Controls
-    let jumpRequested = false; // Track if jump is requested
+    let jumpRequested = false;
 
     document.addEventListener('keydown', function(event) {
         if (event.key === 'ArrowLeft') {
@@ -83,10 +83,10 @@ window.onload = function() {
         } else if (event.key === 'ArrowRight') {
             playerVelocityX = playerSpeed;
             currentPlayerImage = playerImageRight;
-        } else if (event.key === 'ArrowUp' || event.key === ' ') { // Jump on Up Arrow or Spacebar
+        } else if (event.key === 'ArrowUp' || event.key === ' ') { 
             if (!jumpRequested) {
                 jump();
-                jumpRequested = true; // Set flag to prevent long presses
+                jumpRequested = true;
             }
         }
     });
@@ -94,15 +94,14 @@ window.onload = function() {
     document.addEventListener('keyup', function(event) {
         if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
             playerVelocityX = 0;
-        } else if (event.key === 'ArrowUp' || event.key === ' ') { // Reset jump request on key release
+        } else if (event.key === 'ArrowUp' || event.key === ' ') {
             jumpRequested = false;
         }
     });
 
-    // Mobile Controls
     let isTouchingLeft = false;
     let isTouchingRight = false;
-    let jumpRequestedTouch = false; // Track if jump is requested by touch
+    let jumpRequestedTouch = false;
 
     canvas.addEventListener('touchstart', function(e) {
         e.preventDefault();
@@ -114,7 +113,7 @@ window.onload = function() {
         }
         if (!jumpRequestedTouch) {
             jump();
-            jumpRequestedTouch = true; // Set flag to prevent long presses
+            jumpRequestedTouch = true;
         }
     });
 
@@ -122,7 +121,7 @@ window.onload = function() {
         isTouchingLeft = false;
         isTouchingRight = false;
         playerVelocityX = 0;
-        jumpRequestedTouch = false; // Reset jump request on touch end
+        jumpRequestedTouch = false;
     });
 
     canvas.addEventListener('touchmove', function(e) {
@@ -164,15 +163,13 @@ window.onload = function() {
     }
 
     function checkGameOver() {
-        // Check if player has fallen below the screen
         if (playerY > canvas.height) {
             isGameOver = true;
         }
 
-        // Check if any block has been missed
         blocks.forEach(block => {
             if (block.y > canvas.height && !block.hit) {
-                block.missed = true; // Mark the block as missed
+                block.missed = true;
                 isGameOver = true;
             }
         });
@@ -188,8 +185,8 @@ window.onload = function() {
             ctx.font = '30px Arial';
             ctx.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
             ctx.fillText('Score: ' + score, canvas.width / 2 - 50, canvas.height / 2 + 40);
-            document.getElementById('restartButton').style.display = 'block'; // Show the restart button
-            return;
+            restartButton.style.display = 'block'; // Show the restart button
+            return; 
         }
 
         updateControls();
@@ -200,4 +197,41 @@ window.onload = function() {
         playerY += playerVelocityY;
         playerX += playerVelocityX;
 
-        // Prevent pl
+        if (playerX < 0) playerX = 0;
+        if (playerX + playerWidth > canvas.width) playerX = canvas.width - playerWidth;
+        if (playerY < 0) playerY = 0;
+
+        blocks.forEach(block => {
+            block.y += gameSpeed;
+        });
+
+        if (timestamp - lastBlockGenerationTime > blockGenerationInterval) {
+            generateBlock();
+            lastBlockGenerationTime = timestamp;
+        }
+
+        if (blocks.length > 0 && blocks[blocks.length - 1].y > canvas.height) {
+            blocks.shift();
+        }
+
+        checkGameOver();
+
+        checkBlockCollision();
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        blocks.forEach(block => {
+            ctx.fillStyle = block.color;
+            ctx.fillRect(block.x, block.y, block.width, block.height);
+        });
+
+        ctx.drawImage(currentPlayerImage, playerX, playerY, playerWidth, playerHeight);
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    restartButton.addEventListener('click', function() {
+        resetGame();
+        requestAnimationFrame(gameLoop);
+    });
+};
