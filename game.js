@@ -52,6 +52,7 @@ window.onload = function() {
         blocks.length = 0;
         generateInitialBlocks();
         canJump = true; // Reset the jump flag
+        jumpRequested = false; // Reset jump request flag
     }
 
     function generateInitialBlocks() {
@@ -82,10 +83,8 @@ window.onload = function() {
         } else if (event.key === 'ArrowRight') {
             playerVelocityX = playerSpeed;
             currentPlayerImage = playerImageRight;
-        } else if ((event.key === 'ArrowUp' || event.key === ' ') && canJump) { // Jump on Up Arrow or Spacebar
-            if (!jumpRequested) {
-                jumpRequested = true;
-            }
+        } else if ((event.key === 'ArrowUp' || event.key === ' ') && canJump && !jumpRequested) { // Jump on Up Arrow or Spacebar
+            jumpRequested = true;
         }
     });
 
@@ -218,7 +217,7 @@ window.onload = function() {
         // Handle jump request
         if (jumpRequested) {
             jump();
-            jumpRequested = false; // Reset jump request
+            jumpRequested = false; // Reset jump request after executing
         }
 
         checkBlockCollision();
