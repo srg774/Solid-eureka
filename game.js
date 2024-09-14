@@ -13,11 +13,13 @@ window.onload = function() {
     let gravity = 0.1;
     let playerVelocityY = 0;
     let playerVelocityX = 0;
+    let isJumping = false; // New variable to track if the player is jumping
 
     // Player variables
     const playerWidth = 30;
     const playerHeight = 30;
     const playerSpeed = 2;
+    const jumpStrength = 4; // How strong the jump is
     const maxSpeed = 2;
     let playerX, playerY;
     let isFlying = false;
@@ -51,7 +53,7 @@ window.onload = function() {
         gameSpeed = 0.5;
         score = 0;
         playerX = canvas.width / 2 - playerWidth / 2;
-        playerY = -playerHeight;
+        playerY = canvas.height - playerHeight - 100; // Adjust starting position
         playerVelocityY = 1;
         blocks.length = 0;
         generateInitialBlocks();
@@ -86,6 +88,8 @@ window.onload = function() {
         } else if (event.key === 'ArrowRight') {
             playerVelocityX = playerSpeed;
             currentPlayerImage = playerImageRight; // Switch to right image
+        } else if (event.key === 'ArrowUp' || event.key === ' ') { // ArrowUp or spacebar to jump
+            jump();
         }
     });
 
@@ -94,6 +98,15 @@ window.onload = function() {
             playerVelocityX = 0;
         }
     });
+
+    // Jump function
+    function jump() {
+        // Allow jump only if not already jumping or falling
+        if (!isJumping && playerVelocityY === 0) {
+            playerVelocityY = -jumpStrength;
+            isJumping = true;
+        }
+    }
 
     // Add touch controls for mobile devices
     const leftButton = document.createElement('button');
@@ -109,6 +122,14 @@ window.onload = function() {
     rightButton.style.bottom = '20px';
     rightButton.style.right = '20px';
     document.body.appendChild(rightButton);
+
+    const jumpButton = document.createElement('button');
+    jumpButton.innerHTML = 'Jump';
+    jumpButton.style.position = 'absolute';
+    jumpButton.style.bottom = '20px';
+    jumpButton.style.left = '50%';
+    jumpButton.style.transform = 'translateX(-50%)';
+    document.body.appendChild(jumpButton);
 
     // Event listeners for touch controls
     leftButton.addEventListener('touchstart', function() {
@@ -129,17 +150,22 @@ window.onload = function() {
         playerVelocityX = 0;
     });
 
+    jumpButton.addEventListener('touchstart', function() {
+        jump();
+    });
+
     // Check for collisions more efficiently
     function checkBlockCollision() {
         for (let i = 0; i < blocks.length; i++) {
             const block = blocks[i];
             if (playerX + playerWidth > block.x &&
                 playerX < block.x + blockWidth &&
-                playerY + playerHeight > block.y &&
-                playerY < block.y + blockHeight) {
+                playerY + playerHeight >= block.y &&
+                playerY + playerHeight <= block.y + blockHeight) { // Adjust collision for landing on block
                 // Collision detected - land on the block
                 playerVelocityY = 0;
                 playerY = block.y - playerHeight;
+                isJumping = false; // Allow jumping again
                 block.color = 'green';
                 score += 1;
                 gameSpeed += 0.05;
@@ -217,4 +243,3 @@ window.onload = function() {
         requestAnimationFrame(gameLoop);
     }
 };
-
