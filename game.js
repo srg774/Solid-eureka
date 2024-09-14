@@ -150,9 +150,17 @@ window.onload = function() {
     }
 
     function checkGameOver() {
+        // Check if player has fallen below the screen
         if (playerY > canvas.height) {
             isGameOver = true;
         }
+
+        // Check if any block has missed
+        blocks.forEach(block => {
+            if (block.y > canvas.height && !block.hit) {
+                isGameOver = true;
+            }
+        });
     }
 
     const blockGenerationInterval = 1000;
