@@ -64,7 +64,8 @@ window.onload = function() {
                 y: -blockHeight,
                 width: blockWidth,
                 height: blockHeight,
-                color: 'blue'
+                color: 'blue',
+                hit: false // Initialize as not hit
             };
             blocks.push(block);
         }
@@ -142,7 +143,8 @@ window.onload = function() {
                 // Bounce off the block
                 playerVelocityY = -jumpStrength;
                 playerY = block.y - playerHeight;
-                block.color = 'green';
+                block.color = 'green'; // Change color to indicate it was hit
+                block.hit = true; // Mark block as hit
                 score += 1;
                 // Gradually increase game speed
                 gameSpeed += 0.01;
