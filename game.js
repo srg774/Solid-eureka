@@ -11,8 +11,7 @@ window.onload = function() {
     let gravity = 0.1;
     let playerVelocityY = 2; // Start falling
     let playerVelocityX = 0;
-    let isJumping = false;
-    let canJump = false;
+    let canJump = false; // Track if the player can jump
 
     const playerWidth = 30;
     const playerHeight = 30;
@@ -48,8 +47,7 @@ window.onload = function() {
         playerX = canvas.width / 2 - playerWidth / 2;
         playerY = -playerHeight; // Start position off the top of the screen
         playerVelocityY = 2; // Start falling
-        isJumping = false;
-        canJump = false; // Initially not allowed to jump
+        canJump = true; // Allow jumping from the start
         blocks.length = 0;
         generateInitialBlocks();
     }
@@ -92,9 +90,8 @@ window.onload = function() {
     });
 
     function jump() {
-        if (canJump) {
+        if (canJump || playerVelocityY > 0) {
             playerVelocityY = -jumpStrength;
-            isJumping = true;
             canJump = false;
         }
     }
@@ -112,8 +109,7 @@ window.onload = function() {
             ) {
                 playerVelocityY = 0;
                 playerY = block.y - playerHeight;
-                isJumping = false;
-                canJump = true;
+                canJump = true; // Allow jumping again after landing
                 block.color = 'green';
                 score += 1;
                 gameSpeed += 0.05;
@@ -122,7 +118,7 @@ window.onload = function() {
             }
         }
         if (!landed) {
-            canJump = false;
+            canJump = false; // If no block collision, player cannot jump
         }
     }
 
@@ -202,3 +198,4 @@ window.onload = function() {
         e.preventDefault();
     });
 };
+
