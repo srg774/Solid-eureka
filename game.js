@@ -14,6 +14,7 @@ window.onload = function() {
     let playerVelocityY = 0;
     let playerVelocityX = 0;
     let isJumping = false; // Track if the player is jumping
+    let canJump = false; // Track if the player can jump
 
     // Player variables
     const playerWidth = 30;
@@ -55,6 +56,7 @@ window.onload = function() {
         playerY = canvas.height - playerHeight - 100; // Starting position
         playerVelocityY = 0;
         isJumping = false;
+        canJump = true; // Allow jumping at the start
         blocks.length = 0;
         generateInitialBlocks();
     }
@@ -101,15 +103,17 @@ window.onload = function() {
 
     // Jump function
     function jump() {
-        // Only jump if not already jumping
-        if (!isJumping) {
+        // Only jump if the player can jump
+        if (canJump && !isJumping) {
             playerVelocityY = -jumpStrength; // Jumping gives an upward force
             isJumping = true; // Set jumping state to true
+            canJump = false; // Prevent continuous jumping
         }
     }
 
     // Check for collisions more efficiently
     function checkBlockCollision() {
+        canJump = false; // Reset the jump flag initially
         for (let i = 0; i < blocks.length; i++) {
             const block = blocks[i];
             // Check if the player is landing on the block
@@ -123,6 +127,7 @@ window.onload = function() {
                 playerVelocityY = 0; // Stop downward movement
                 playerY = block.y - playerHeight; // Set player on top of the block
                 isJumping = false; // Allow jumping again
+                canJump = true; // Allow the player to jump again
                 block.color = 'green'; // Change block color
                 score += 1;
                 gameSpeed += 0.05;
