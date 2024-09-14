@@ -11,15 +11,14 @@ window.onload = function() {
     let gravity = 0.2;
     let playerVelocityY = 0;
     let playerVelocityX = 0;
+    let isJumping = false; // Flag to check if player is jumping
 
     const playerWidth = 30;
     const playerHeight = 30;
     const playerSpeed = 2;
-    const jumpStrength = 4; // Jump strength
+    const jumpStrength = 4; // Reduced bounce strength
     const maxSpeed = 5;
     let playerX, playerY;
-    let canJump = true; // Flag to track if jumping is allowed
-    let jumpRequested = false; // Flag to track if jump is requested
 
     const playerImageRight = new Image();
     playerImageRight.src = 'sprite_sheet_R.png';
@@ -49,10 +48,9 @@ window.onload = function() {
         playerY = canvas.height / 2 - playerHeight / 2;
         playerVelocityY = 0;
         playerVelocityX = 0;
+        isJumping = false;
         blocks.length = 0;
         generateInitialBlocks();
-        canJump = true; // Reset the jump flag
-        jumpRequested = false; // Reset jump request flag
     }
 
     function generateInitialBlocks() {
@@ -83,8 +81,11 @@ window.onload = function() {
         } else if (event.key === 'ArrowRight') {
             playerVelocityX = playerSpeed;
             currentPlayerImage = playerImageRight;
-        } else if ((event.key === 'ArrowUp' || event.key === ' ') && canJump) { // Jump on Up Arrow or Spacebar
-            jumpRequested = true;
+        } else if (event.key === 'ArrowUp' || event.key === ' ') { // Jump on Up Arrow or Spacebar
+            if (!isJumping) { // Only allow jump if not already jumping
+                jump();
+                isJumping = true;
+            }
         }
     });
 
@@ -92,7 +93,7 @@ window.onload = function() {
         if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
             playerVelocityX = 0;
         } else if (event.key === 'ArrowUp' || event.key === ' ') {
-            jumpRequested = false; // Allow next jump after key is released
+            isJumping = false; // Allow jumping again when key is released
         }
     });
 
@@ -108,14 +109,17 @@ window.onload = function() {
         } else {
             isTouchingRight = true;
         }
-        if (canJump) {
-            jumpRequested = true;
+        if (!isJumping) { // Only allow jump if not already jumping
+            jump();
+            isJumping = true;
         }
     });
 
     canvas.addEventListener('touchend', function(e) {
         isTouchingLeft = false;
         isTouchingRight = false;
+        playerVelocityX = 0;
+        isJumping = false; // Allow jumping again when touch ends
     });
 
     canvas.addEventListener('touchmove', function(e) {
@@ -136,11 +140,7 @@ window.onload = function() {
     }
 
     function jump() {
-        if (canJump) {
-            playerVelocityY = -jumpStrength;
-            playerY += playerVelocityY; // Adjust player position immediately for a jump
-            canJump = false; // Prevent continuous jumping
-        }
+        playerVelocityY = -jumpStrength;
     }
 
     function checkBlockCollision() {
@@ -159,7 +159,7 @@ window.onload = function() {
                 score += 1;
                 // Gradually increase game speed
                 gameSpeed += 0.01;
-                canJump = true; // Allow jump again after hitting a block
+                isJumping = false; // Reset jumping flag when hitting block
             }
         });
     }
@@ -213,13 +213,6 @@ window.onload = function() {
         // Remove blocks that are out of view
         if (blocks.length > 0 && blocks[blocks.length - 1].y > canvas.height) {
             blocks.shift();
-        }
-
-        // Handle jump request
-        if (jumpRequested) {
-            jump();
-            jumpRequested = false; // Reset jump request after executing
-            canJump = false; // Prevent further jumps until the player hits a block or the ground
         }
 
         checkBlockCollision();
