@@ -160,7 +160,6 @@ window.onload = function() {
 
     function gameLoop(timestamp) {
         if (isGameOver) {
-            // Draw game over screen
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = 'black';
             ctx.font = '30px Arial';
@@ -188,11 +187,13 @@ window.onload = function() {
             block.y += gameSpeed;
         });
 
+        // Generate new blocks as needed
         if (timestamp - lastBlockGenerationTime > blockGenerationInterval) {
             generateBlock();
             lastBlockGenerationTime = timestamp;
         }
 
+        // Remove blocks that are out of view
         if (blocks.length > 0 && blocks[blocks.length - 1].y > canvas.height) {
             blocks.shift();
         }
