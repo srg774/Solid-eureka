@@ -153,6 +153,15 @@ window.onload = function() {
     }
 
     function checkGameOver() {
+        if (playerY > canvas.height) {
+            isGameOver = true;
+            ctx.fillStyle = 'black';
+            ctx.font = '30px Arial';
+            ctx.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
+            ctx.fillText('Score: ' + score, canvas.width / 2 - 50, canvas.height / 2 + 40);
+            return; // Stop further processing if game is over
+        }
+
         blocks.forEach(block => {
             if (block.y > canvas.height && !block.hit) {
                 isGameOver = true;
@@ -186,6 +195,11 @@ window.onload = function() {
         // Prevent player from moving out of bounds
         if (playerX < 0) playerX = 0;
         if (playerX + playerWidth > canvas.width) playerX = canvas.width - playerWidth;
+        if (playerY < 0) playerY = 0; // Prevent going above the top
+        if (playerY + playerHeight > canvas.height) { // Prevent going below the bottom
+            playerY = canvas.height - playerHeight; // Keep within bounds
+            playerVelocityY = 0; // Stop downward movement when touching bottom
+        }
 
         // Move blocks and scroll screen
         blocks.forEach(block => {
