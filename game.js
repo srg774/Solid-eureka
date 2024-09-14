@@ -1,143 +1,126 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+// Ensure that the script runs after the DOM is fully loaded
+window.onload = function() {
+    // Get the canvas and context
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
 
-// Game settings
-const gravity = 0.8;
-const jumpStrength = 15;
-const playerSpeed = 5;
+    // Define player variables
+    const playerWidth = 64;
+    const playerHeight = 96;
+    const playerSpeed = 5;
+    const gravity = 0.5;
+    const jumpPower = -10;
+    let isJumping = false;
+    let isMovingLeft = false;
+    let isMovingRight = false;
+    let yVelocity = 0;
+    
+    // Load images
+    const playerImageL = new Image();
+    const playerImageR = new Image();
+    playerImageL.src = 'sprite_sheet_L.png'; // Update with the correct path if needed
+    playerImageR.src = 'sprite_sheet_R.png'; // Update with the correct path if needed
 
-// Player object
-const player = {
-    x: 100,
-    y: 100,
-    width: 64,
-    height: 96,
-    dx: 0,
-    dy: 0,
-    isJumping: false,
-    direction: 'right', // 'left' or 'right'
-    frameX: 0,
-    frameY: 0,
-    speed: 5,
-    jumping: false
-};
+    // Ensure images are loaded before starting the game loop
+    playerImageL.onload = function() {
+        playerImageR.onload = function() {
+            // Start the game loop
+            gameLoop();
+        };
+    };
 
-// Load images for the player
-const playerImageL = new Image();
-playerImageL.src = 'sprite_sheet_L.png';
-const playerImageR = new Image();
-playerImageR.src = 'sprite_sheet_R.png';
+    // Define player position
+    let playerX = canvas.width / 2 - playerWidth / 2;
+    let playerY = canvas.height - playerHeight;
 
-// Load status for images
-let imagesLoaded = 0;
+    // Handle key presses
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft') {
+            isMovingLeft = true;
+        }
+        if (e.key === 'ArrowRight') {
+            isMovingRight = true;
+        }
+        if (e.key === ' ' && !isJumping) {
+            isJumping = true;
+            yVelocity = jumpPower;
+        }
+    });
 
-playerImageL.onload = () => {
-    imagesLoaded++;
-    if (imagesLoaded === 2) {
-        startGame();
+    document.addEventListener('keyup', function(e) {
+        if (e.key === 'ArrowLeft') {
+            isMovingLeft = false;
+        }
+        if (e.key === 'ArrowRight') {
+            isMovingRight = false;
+        }
+    });
+
+    // Mobile controls
+    const controls = {
+        left: false,
+        right: false,
+        jump: false
+    };
+
+    document.addEventListener('touchstart', function(e) {
+        const touch = e.touches[0];
+        const touchX = touch.clientX;
+        const touchY = touch.clientY;
+        // Example: simple control zones
+        if (touchX < canvas.width / 2) {
+            controls.left = true;
+        } else {
+            controls.right = true;
+        }
+        if (touchY < canvas.height / 2) {
+            controls.jump = true;
+        }
+    });
+
+    document.addEventListener('touchend', function(e) {
+        controls.left = false;
+        controls.right = false;
+        controls.jump = false;
+    });
+
+    // Game loop
+    function gameLoop() {
+        // Update player position
+        if (isMovingLeft) {
+            playerX -= playerSpeed;
+        }
+        if (isMovingRight) {
+            playerX += playerSpeed;
+        }
+        if (controls.left) {
+            playerX -= playerSpeed;
+        }
+        if (controls.right) {
+            playerX += playerSpeed;
+        }
+        if (controls.jump && !isJumping) {
+            isJumping = true;
+            yVelocity = jumpPower;
+        }
+
+        // Gravity
+        yVelocity += gravity;
+        playerY += yVelocity;
+
+        // Check for ground collision
+        if (playerY > canvas.height - playerHeight) {
+            playerY = canvas.height - playerHeight;
+            yVelocity = 0;
+            isJumping = false;
+        }
+
+        // Draw background and player
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(playerImageR, 0, 0, playerWidth, playerHeight, playerX, playerY, playerWidth, playerHeight);
+
+        // Request next frame
+        requestAnimationFrame(gameLoop);
     }
 };
-playerImageR.onload = () => {
-    imagesLoaded++;
-    if (imagesLoaded === 2) {
-        startGame();
-    }
-};
 
-// Keyboard controls
-const keys = {
-    left: false,
-    right: false,
-    up: false
-};
-
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
-    if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
-    if (e.key === 'ArrowUp' || e.key === 'w') keys.up = true;
-});
-
-document.addEventListener('keyup', (e) => {
-    if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
-    if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
-    if (e.key === 'ArrowUp' || e.key === 'w') keys.up = false;
-});
-
-// Mobile controls
-const leftButton = document.getElementById('leftButton');
-const rightButton = document.getElementById('rightButton');
-const jumpButton = document.getElementById('jumpButton');
-
-leftButton.addEventListener('mousedown', () => keys.left = true);
-leftButton.addEventListener('mouseup', () => keys.left = false);
-rightButton.addEventListener('mousedown', () => keys.right = true);
-rightButton.addEventListener('mouseup', () => keys.right = false);
-jumpButton.addEventListener('mousedown', () => keys.up = true);
-jumpButton.addEventListener('mouseup', () => keys.up = false);
-
-// Game loop
-function startGame() {
-    requestAnimationFrame(gameLoop);
-}
-
-function gameLoop() {
-    updatePlayer();
-    draw();
-    requestAnimationFrame(gameLoop);
-}
-
-function updatePlayer() {
-    // Horizontal movement
-    if (keys.left) {
-        player.dx = -playerSpeed;
-        player.direction = 'left';
-    } else if (keys.right) {
-        player.dx = playerSpeed;
-        player.direction = 'right';
-    } else {
-        player.dx = 0;
-    }
-
-    // Jumping
-    if (keys.up && !player.jumping) {
-        player.dy = -jumpStrength;
-        player.jumping = true;
-    }
-
-    // Gravity
-    player.dy += gravity;
-
-    // Update position
-    player.x += player.dx;
-    player.y += player.dy;
-
-    // Prevent player from falling through the floor
-    if (player.y + player.height > canvas.height) {
-        player.y = canvas.height - player.height;
-        player.dy = 0;
-        player.jumping = false;
-    }
-
-    // Update animation frame
-    player.frameX = (player.frameX + 1) % 4; // Assuming 4 frames per row
-}
-
-function drawPlayer() {
-    const spriteWidth = 64;
-    const spriteHeight = 96;
-    const frameY = 0; // Assuming the player always uses the first row
-
-    if (player.direction === 'right') {
-        ctx.drawImage(playerImageR, player.frameX * spriteWidth, frameY, spriteWidth, spriteHeight, player.x, player.y, player.width, player.height);
-    } else {
-        ctx.drawImage(playerImageL, player.frameX * spriteWidth, frameY, spriteWidth, spriteHeight, player.x, player.y, player.width, player.height);
-    }
-}
-
-function draw() {
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw player
-    drawPlayer();
-}
