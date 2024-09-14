@@ -15,13 +15,11 @@ window.onload = function() {
     const playerWidth = 30;
     const playerHeight = 30;
     const playerSpeed = 2;
-    const jumpStrength = 4; // Reduced bounce strength
+    const jumpStrength = 4; // Jump strength
     const maxSpeed = 5;
     let playerX, playerY;
     let canJump = true; // Flag to track if jumping is allowed
     let jumpRequested = false; // Flag to track if jump is requested
-    const jumpDebounceTime = 200; // Time in milliseconds to debounce jump requests
-    let lastJumpTime = 0; // Timestamp of the last jump request
 
     const playerImageRight = new Image();
     playerImageRight.src = 'sprite_sheet_R.png';
@@ -85,18 +83,16 @@ window.onload = function() {
         } else if (event.key === 'ArrowRight') {
             playerVelocityX = playerSpeed;
             currentPlayerImage = playerImageRight;
-        } else if ((event.key === 'ArrowUp' || event.key === ' ') && canJump && !jumpRequested) { // Jump on Up Arrow or Spacebar
-            let currentTime = new Date().getTime();
-            if (currentTime - lastJumpTime > jumpDebounceTime) {
-                jumpRequested = true;
-                lastJumpTime = currentTime;
-            }
+        } else if ((event.key === 'ArrowUp' || event.key === ' ') && canJump) { // Jump on Up Arrow or Spacebar
+            jumpRequested = true;
         }
     });
 
     document.addEventListener('keyup', function(event) {
         if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
             playerVelocityX = 0;
+        } else if (event.key === 'ArrowUp' || event.key === ' ') {
+            jumpRequested = false; // Allow next jump after key is released
         }
     });
 
@@ -112,19 +108,14 @@ window.onload = function() {
         } else {
             isTouchingRight = true;
         }
-        if (canJump && !jumpRequested) {
-            let currentTime = new Date().getTime();
-            if (currentTime - lastJumpTime > jumpDebounceTime) {
-                jumpRequested = true;
-                lastJumpTime = currentTime;
-            }
+        if (canJump) {
+            jumpRequested = true;
         }
     });
 
     canvas.addEventListener('touchend', function(e) {
         isTouchingLeft = false;
         isTouchingRight = false;
-        playerVelocityX = 0;
     });
 
     canvas.addEventListener('touchmove', function(e) {
@@ -228,6 +219,7 @@ window.onload = function() {
         if (jumpRequested) {
             jump();
             jumpRequested = false; // Reset jump request after executing
+            canJump = false; // Prevent further jumps until the player hits a block or the ground
         }
 
         checkBlockCollision();
