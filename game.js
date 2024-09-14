@@ -8,15 +8,14 @@ window.onload = function() {
     let isGameOver = false;
     let gameSpeed = 0.5;
     let score = 0;
-    let gravity = 0.1;
-    let playerVelocityY = 0; // Start with no vertical movement
+    let gravity = 0.2; // Adjusted for a more noticeable gravity effect
+    let playerVelocityY = 0;
     let playerVelocityX = 0;
-    let isJumping = false; // Track if the player is jumping
 
     const playerWidth = 30;
     const playerHeight = 30;
     const playerSpeed = 2;
-    const jumpStrength = 5; // Strength of the jump
+    const jumpStrength = 8; // Higher value for a more noticeable flap
     const maxSpeed = 5;
     let playerX, playerY;
 
@@ -45,9 +44,8 @@ window.onload = function() {
         gameSpeed = 0.5;
         score = 0;
         playerX = canvas.width / 2 - playerWidth / 2;
-        playerY = -playerHeight; // Start position off the top of the screen
-        playerVelocityY = 0; // Start with no vertical movement
-        isJumping = false; // Initial state is not jumping
+        playerY = canvas.height / 2 - playerHeight / 2; // Start position in the center
+        playerVelocityY = 0;
         blocks.length = 0;
         generateInitialBlocks();
     }
@@ -90,10 +88,8 @@ window.onload = function() {
     });
 
     function jump() {
-        if (!isJumping) {
-            playerVelocityY = -jumpStrength; // Apply upward force
-            isJumping = true; // Set jumping state
-        }
+        // Apply an upward force to mimic flapping
+        playerVelocityY = -jumpStrength;
     }
 
     function checkBlockCollision() {
@@ -106,9 +102,8 @@ window.onload = function() {
                 playerY + playerHeight > block.y &&
                 playerY + playerHeight <= block.y + blockHeight + playerVelocityY
             ) {
-                playerVelocityY = 0; // Stop falling
+                playerVelocityY = 0; // Stop vertical movement
                 playerY = block.y - playerHeight; // Place player on top of block
-                isJumping = false; // Reset jumping state
                 block.color = 'green'; // Change block color
                 score += 1;
                 gameSpeed += 0.05;
@@ -117,7 +112,7 @@ window.onload = function() {
             }
         }
         if (!landed && playerY + playerHeight < canvas.height) {
-            isJumping = true; // Allow continuous jumping if falling
+            // Ensure the player can still jump if falling
         }
     }
 
@@ -139,24 +134,30 @@ window.onload = function() {
             return;
         }
 
+        // Apply gravity
         playerVelocityY += gravity;
         if (playerVelocityY > maxSpeed) playerVelocityY = maxSpeed;
 
+        // Move the player
         playerY += playerVelocityY;
         playerX += playerVelocityX;
 
+        // Prevent player from moving out of bounds
         if (playerX < 0) playerX = 0;
         if (playerX + playerWidth > canvas.width) playerX = canvas.width - playerWidth;
 
+        // Move blocks and scroll screen
         blocks.forEach(block => {
             block.y += gameSpeed;
         });
 
+        // Generate new blocks as needed
         if (timestamp - lastBlockGenerationTime > blockGenerationInterval) {
             generateBlock();
             lastBlockGenerationTime = timestamp;
         }
 
+        // Remove blocks that are out of view
         if (blocks.length > 0 && blocks[0].y > canvas.height) {
             blocks.shift();
         }
@@ -164,28 +165,24 @@ window.onload = function() {
         checkBlockCollision();
         checkGameOver();
 
+        // Clear the canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // Draw blocks
         blocks.forEach(block => {
             ctx.fillStyle = block.color;
             ctx.fillRect(block.x, block.y, block.width, block.height);
         });
 
+        // Draw player
         ctx.drawImage(currentPlayerImage, playerX, playerY, playerWidth, playerHeight);
 
+        // Request next frame
         requestAnimationFrame(gameLoop);
     }
 
     canvas.addEventListener('touchstart', function(e) {
         e.preventDefault(); // Prevent default touch behavior
-        const touch = e.touches[0];
-        if (touch.clientX < canvas.width / 2) {
-            playerVelocityX = -playerSpeed;
-            currentPlayerImage = playerImageLeft;
-        } else {
-            playerVelocityX = playerSpeed;
-            currentPlayerImage = playerImageRight;
-        }
         jump(); // Trigger jump on touch start
     });
 
@@ -197,4 +194,3 @@ window.onload = function() {
         e.preventDefault(); // Prevent default scrolling
     });
 };
-
