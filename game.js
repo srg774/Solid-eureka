@@ -147,7 +147,6 @@ window.onload = function () {
                 block.color = 'green'; // Change color to indicate success
                 score += 1; // Increase score
                 gameSpeed += 0.05; // Gradually increase scrolling speed
-                generateBlock(canvas.height); // Add a new block above
                 break;
             }
         }
@@ -224,3 +223,4 @@ window.onload = function () {
         requestAnimationFrame(gameLoop);
     }
 };
+
