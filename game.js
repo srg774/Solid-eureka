@@ -4,12 +4,12 @@ window.onload = function () {
 
     // Game variables
     let isGameOver = false;
-    let gameSpeed = 1;
+    let gameSpeed = 2; // Initial scrolling speed
     let score = 0;
 
     // Player variables
     const playerWidth = 64;
-    const playerHeight = 64; // Adjust the player's size for flying
+    const playerHeight = 64;
     const playerSpeed = 5;
     let playerX, playerY;
     let isMovingUp = false;
@@ -17,60 +17,41 @@ window.onload = function () {
     let isMovingLeft = false;
     let isMovingRight = false;
 
-    // Load player images
+    // Load player image
     const playerImage = new Image();
     playerImage.src = 'sprite_sheet_R.png'; // Assume this image shows the character flying
 
-    // Icons for collection
-    const emailIcon = new Image();
-    const messageIcon = new Image();
-    emailIcon.src = 'email_icon.png'; // Replace with the path to your email icon
-    messageIcon.src = 'message_icon.png'; // Replace with the path to your message icon
+    // Blocks
+    const blocks = [];
+    const blockSize = 50;
 
-    const icons = []; // Array to hold the collectible icons
-
-    // Ensure images are loaded before starting the game loop
-    let imagesLoaded = 0;
-    playerImage.onload = checkAllImagesLoaded;
-    emailIcon.onload = checkAllImagesLoaded;
-    messageIcon.onload = checkAllImagesLoaded;
-
-    function checkAllImagesLoaded() {
-        imagesLoaded++;
-        if (imagesLoaded === 3) {
-            resetGame();
-            gameLoop();
-        }
-    }
+    // Ensure the player image is loaded before starting the game loop
+    playerImage.onload = function () {
+        resetGame();
+        gameLoop();
+    };
 
     // Reset game state
     function resetGame() {
         isGameOver = false;
-        gameSpeed = 1;
+        gameSpeed = 2;
         score = 0;
         playerX = canvas.width / 2 - playerWidth / 2;
         playerY = canvas.height / 2 - playerHeight / 2;
-        icons.length = 0; // Clear existing icons
-        generateIcons(); // Add new icons
+        blocks.length = 0; // Clear existing blocks
+        generateBlock(); // Add the first block
     }
 
-    // Generate random icons
-    function generateIcons() {
-        for (let i = 0; i < 5; i++) {
-            addNewIcon();
-        }
-    }
-
-    // Add a new icon at a random position
-    function addNewIcon() {
-        const iconType = Math.random() > 0.5 ? emailIcon : messageIcon; // Randomly select the icon
-        icons.push({
-            image: iconType,
-            x: Math.random() * (canvas.width - 32),
-            y: Math.random() * (canvas.height - 32),
-            width: 32,
-            height: 32,
-        });
+    // Generate a new block at a random position
+    function generateBlock() {
+        const block = {
+            x: canvas.width, // Start off-screen
+            y: Math.random() * (canvas.height - blockSize),
+            width: blockSize,
+            height: blockSize,
+            color: 'blue'
+        };
+        blocks.push(block);
     }
 
     // Event listeners for keyboard controls
@@ -109,19 +90,19 @@ window.onload = function () {
         isMovingUp = isMovingDown = isMovingLeft = isMovingRight = false;
     });
 
-    // Check collision with icons
-    function checkIconCollision() {
-        for (let i = 0; i < icons.length; i++) {
-            const icon = icons[i];
-            if (playerX < icon.x + icon.width &&
-                playerX + playerWidth > icon.x &&
-                playerY < icon.y + icon.height &&
-                playerY + playerHeight > icon.y) {
+    // Check collision with blocks
+    function checkBlockCollision() {
+        for (let i = 0; i < blocks.length; i++) {
+            const block = blocks[i];
+            if (playerX < block.x + block.width &&
+                playerX + playerWidth > block.x &&
+                playerY < block.y + block.height &&
+                playerY + playerHeight > block.y) {
                 // Collision detected
-                icons.splice(i, 1); // Remove the icon
+                block.color = 'green'; // Change color to indicate success
                 score += 1; // Increase score
-                gameSpeed += 0.05; // Increase difficulty
-                addNewIcon(); // Add a new icon
+                gameSpeed += 0.1; // Increase difficulty
+                generateBlock(); // Add a new block
                 break;
             }
         }
@@ -145,21 +126,34 @@ window.onload = function () {
         }
 
         // Move the player
-        if (isMovingUp) playerY -= playerSpeed * gameSpeed;
-        if (isMovingDown) playerY += playerSpeed * gameSpeed;
-        if (isMovingLeft) playerX -= playerSpeed * gameSpeed;
-        if (isMovingRight) playerX += playerSpeed * gameSpeed;
+        if (isMovingUp) playerY -= playerSpeed;
+        if (isMovingDown) playerY += playerSpeed;
+        if (isMovingLeft) playerX -= playerSpeed;
+        if (isMovingRight) playerX += playerSpeed;
+
+        // Move blocks to the left to create the scrolling effect
+        blocks.forEach(block => {
+            block.x -= gameSpeed;
+        });
+
+        // Remove blocks that have moved off the screen
+        blocks.forEach((block, index) => {
+            if (block.x + block.width < 0) {
+                blocks.splice(index, 1);
+            }
+        });
 
         // Check for collisions
-        checkIconCollision();
+        checkBlockCollision();
         checkGameOver();
 
         // Clear the canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Draw icons
-        icons.forEach(icon => {
-            ctx.drawImage(icon.image, icon.x, icon.y, icon.width, icon.height);
+        // Draw blocks
+        blocks.forEach(block => {
+            ctx.fillStyle = block.color;
+            ctx.fillRect(block.x, block.y, block.width, block.height);
         });
 
         // Draw player
