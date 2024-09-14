@@ -17,7 +17,7 @@ window.onload = function () {
     // Player variables
     const playerWidth = 30; // Smaller player sprite for mobile
     const playerHeight = 30;
-    const playerSpeed = 0.5; // Speed of horizontal movement
+    const playerSpeed = 2; // Speed of horizontal movement
     const maxSpeed = 2; // Max speed for the player
     let playerX, playerY;
     let isFlying = false;
@@ -224,4 +224,5 @@ window.onload = function () {
         requestAnimationFrame(gameLoop);
     }
 };
+
 
