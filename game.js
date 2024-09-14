@@ -143,17 +143,19 @@ window.onload = function() {
         if (playerX + playerWidth > canvas.width) playerX = canvas.width - playerWidth;
         if (playerY < 0) playerY = 0;
 
+        // Move blocks and check if they need to be removed or regenerated
         blocks.forEach(block => {
             block.y += gameSpeed;
         });
 
+        // Remove blocks that have fallen off the screen
         if (blocks.length > 0 && blocks[0].y > canvas.height) {
-            blocks.shift(); // Remove the block that has gone off-screen
+            blocks.shift();
         }
 
-        // Generate new blocks if necessary
-        if (blocks.length === 0 || blocks[blocks.length - 1].y > blockSpacing) {
-            generateBlock(canvas.height - blockSpacing);
+        // Generate a new block if there are fewer than 3 blocks
+        if (blocks.length < 3) {
+            generateBlock(canvas.height);
         }
 
         checkGameOver();
