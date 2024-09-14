@@ -75,6 +75,7 @@ window.onload = function () {
                 color: 'blue'
             };
             blocks.push(block);
+            console.log(`Generated block at x: ${block.x}, y: ${block.y}`);
         }
     }
 
