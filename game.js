@@ -168,7 +168,7 @@ window.onload = function() {
             return;
         }
 
-        // Update controls
+        // Update mobile controls
         updateControls();
 
         // Apply gravity
@@ -218,6 +218,7 @@ window.onload = function() {
         requestAnimationFrame(gameLoop);
     }
 };
+
 
 
 
