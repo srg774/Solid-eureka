@@ -14,8 +14,6 @@ window.onload = function () {
     const gravity = 0.5;
     const jumpPower = -10;
     let isJumping = false;
-    let isMovingLeft = false;
-    let isMovingRight = false;
     let yVelocity = 0;
     let currentPlayerImage = null;
 
@@ -52,7 +50,7 @@ window.onload = function () {
     const platformWidth = 100;
     const platformHeight = 10;
     const platformCount = 10;
-    const platformGap = 80;
+    const platformGap = 100;
 
     function generatePlatforms() {
         platforms.length = 0; // Clear existing platforms
@@ -66,7 +64,7 @@ window.onload = function () {
 
     function resetGame() {
         isGameOver = false;
-        gameSpeed = 1;
+        gameSpeed = 0.5; // Start slower
         score = 0;
 
         // Reset player position
@@ -82,10 +80,10 @@ window.onload = function () {
     // Event listeners for keyboard controls
     document.addEventListener('keydown', function (e) {
         if (e.key === 'ArrowLeft') {
-            isMovingLeft = true;
+            currentPlayerImage = playerImageL;
         }
         if (e.key === 'ArrowRight') {
-            isMovingRight = true;
+            currentPlayerImage = playerImageR;
         }
         if (e.key === ' ' && !isJumping && !isGameOver) {
             isJumping = true;
@@ -93,40 +91,16 @@ window.onload = function () {
         }
     });
 
-    document.addEventListener('keyup', function (e) {
-        if (e.key === 'ArrowLeft') {
-            isMovingLeft = false;
-        }
-        if (e.key === 'ArrowRight') {
-            isMovingRight = false;
-        }
-    });
-
     // Mobile touch controls
     const controls = {
-        left: false,
-        right: false,
         jump: false
     };
 
     document.addEventListener('touchstart', function (e) {
-        const touch = e.touches[0];
-        const touchX = touch.clientX;
-        const touchY = touch.clientY;
-
-        // Simple touch control zones
-        if (touchX < canvas.width / 3) {
-            controls.left = true;
-        } else if (touchX > canvas.width * 2 / 3) {
-            controls.right = true;
-        } else if (touchY < canvas.height / 2) {
-            controls.jump = true;
-        }
+        controls.jump = true;
     });
 
     document.addEventListener('touchend', function () {
-        controls.left = false;
-        controls.right = false;
         controls.jump = false;
     });
 
@@ -135,14 +109,14 @@ window.onload = function () {
         platforms.forEach(platform => {
             if (playerX < platform.x + platformWidth &&
                 playerX + playerWidth > platform.x &&
-                playerY + playerHeight > platform.y &&
-                playerY + playerHeight < platform.y + platformHeight + yVelocity) {
+                playerY + playerHeight >= platform.y &&
+                playerY + playerHeight <= platform.y + platformHeight + yVelocity) {
                 // Collision detected - player lands on platform
                 playerY = platform.y - playerHeight;
                 yVelocity = jumpPower; // Bounce upwards
                 isJumping = true;
                 score += 1; // Increase score
-                gameSpeed += 0.01; // Increase difficulty
+                gameSpeed += 0.02; // Increase difficulty
             }
         });
     }
@@ -169,15 +143,7 @@ window.onload = function () {
             return; // Stop the game loop
         }
 
-        // Update player position
-        if (isMovingLeft || controls.left) {
-            playerX -= playerSpeed;
-            currentPlayerImage = playerImageL;
-        }
-        if (isMovingRight || controls.right) {
-            playerX += playerSpeed;
-            currentPlayerImage = playerImageR;
-        }
+        // Only move player up when jumping
         if (controls.jump && !isJumping) {
             isJumping = true;
             yVelocity = jumpPower;
@@ -191,7 +157,7 @@ window.onload = function () {
         checkPlatformCollision();
         checkGameOver();
 
-        // Keep player within screen bounds
+        // Keep player within screen bounds horizontally
         if (playerX < 0) {
             playerX = 0;
         }
@@ -220,6 +186,7 @@ window.onload = function () {
         requestAnimationFrame(gameLoop);
     }
 };
+
 
 
 
