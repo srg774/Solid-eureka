@@ -3,7 +3,7 @@ window.onload = function() {
     const ctx = canvas.getContext('2d');
     const restartButton = document.getElementById('restartButton');
 
-    canvas.width = 800;
+    canvas.width = 400;
     canvas.height = 600;
 
     let isGameOver = false;
