@@ -8,14 +8,14 @@ window.onload = function() {
     let isGameOver = false;
     let gameSpeed = 0.5;
     let score = 0;
-    let gravity = 0.2; // Adjusted for a more noticeable gravity effect
+    let gravity = 0.2; // Adjust gravity for a good falling effect
     let playerVelocityY = 0;
     let playerVelocityX = 0;
 
     const playerWidth = 30;
     const playerHeight = 30;
     const playerSpeed = 2;
-    const jumpStrength = 8; // Higher value for a more noticeable flap
+    const jumpStrength = 8; // Strong enough for noticeable jumps
     const maxSpeed = 5;
     let playerX, playerY;
 
@@ -46,6 +46,7 @@ window.onload = function() {
         playerX = canvas.width / 2 - playerWidth / 2;
         playerY = canvas.height / 2 - playerHeight / 2; // Start position in the center
         playerVelocityY = 0;
+        playerVelocityX = 0;
         blocks.length = 0;
         generateInitialBlocks();
     }
@@ -88,8 +89,7 @@ window.onload = function() {
     });
 
     function jump() {
-        // Apply an upward force to mimic flapping
-        playerVelocityY = -jumpStrength;
+        playerVelocityY = -jumpStrength; // Apply upward force
     }
 
     function checkBlockCollision() {
