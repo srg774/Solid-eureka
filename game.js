@@ -19,6 +19,7 @@ window.onload = function() {
     const maxSpeed = 5;
     let playerX, playerY;
     let canJump = true; // Flag to track if jumping is allowed
+    let jumpRequested = false; // Flag to track if jump is requested
 
     const playerImageRight = new Image();
     playerImageRight.src = 'sprite_sheet_R.png';
@@ -82,7 +83,7 @@ window.onload = function() {
             playerVelocityX = playerSpeed;
             currentPlayerImage = playerImageRight;
         } else if ((event.key === 'ArrowUp' || event.key === ' ') && canJump) { // Jump on Up Arrow or Spacebar
-            jump();
+            jumpRequested = true;
         }
     });
 
@@ -95,7 +96,6 @@ window.onload = function() {
     // Mobile Controls
     let isTouchingLeft = false;
     let isTouchingRight = false;
-    let touchJumpAllowed = true; // Flag for mobile jump
 
     canvas.addEventListener('touchstart', function(e) {
         e.preventDefault();
@@ -105,9 +105,8 @@ window.onload = function() {
         } else {
             isTouchingRight = true;
         }
-        if (touchJumpAllowed) {
-            jump();
-            touchJumpAllowed = false; // Prevent continuous jumping
+        if (canJump) {
+            jumpRequested = true;
         }
     });
 
@@ -115,7 +114,6 @@ window.onload = function() {
         isTouchingLeft = false;
         isTouchingRight = false;
         playerVelocityX = 0;
-        touchJumpAllowed = true; // Allow jump on next touch start
     });
 
     canvas.addEventListener('touchmove', function(e) {
@@ -213,6 +211,12 @@ window.onload = function() {
         // Remove blocks that are out of view
         if (blocks.length > 0 && blocks[blocks.length - 1].y > canvas.height) {
             blocks.shift();
+        }
+
+        // Handle jump request
+        if (jumpRequested) {
+            jump();
+            jumpRequested = false; // Reset jump request
         }
 
         checkBlockCollision();
