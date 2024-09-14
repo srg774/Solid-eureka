@@ -43,7 +43,7 @@ window.onload = function() {
         imagesLoaded++;
         if (imagesLoaded === 2) {
             resetGame();
-            gameLoop();
+            requestAnimationFrame(gameLoop);
         }
     };
 
@@ -70,6 +70,7 @@ window.onload = function() {
 
     // Generate a new block
     function generateBlock() {
+        // Create a new block only if the last block is a certain distance away
         if (blocks.length === 0 || blocks[blocks.length - 1].y > blockSpacing) {
             const block = {
                 x: Math.random() * (canvas.width - blockWidth),
@@ -103,16 +104,17 @@ window.onload = function() {
 
     // Jump function
     function jump() {
-        // Only jump if the player can jump
-        if (canJump && !isJumping) {
+        // Allow jumping if the player is in the air or on the ground
+        if (!isJumping || canJump) {
             playerVelocityY = -jumpStrength; // Jumping gives an upward force
             isJumping = true; // Set jumping state to true
             canJump = false; // Prevent continuous jumping
         }
     }
 
-    // Check for collisions more efficiently
+    // Check for collisions and update jumping state
     function checkBlockCollision() {
+        let landed = false; // Track if the player lands on any block
         canJump = false; // Reset the jump flag initially
         for (let i = 0; i < blocks.length; i++) {
             const block = blocks[i];
@@ -131,8 +133,12 @@ window.onload = function() {
                 block.color = 'green'; // Change block color
                 score += 1;
                 gameSpeed += 0.05;
+                landed = true;
                 break;
             }
+        }
+        if (!landed) {
+            canJump = false; // If no block collision, player cannot jump
         }
     }
 
@@ -147,8 +153,12 @@ window.onload = function() {
         }
     }
 
+    // Adjust block generation rate
+    const blockGenerationInterval = 1000; // Time in milliseconds
+    let lastBlockGenerationTime = 0;
+
     // Game loop
-    function gameLoop() {
+    function gameLoop(timestamp) {
         if (isGameOver) {
             return;
         }
@@ -173,7 +183,10 @@ window.onload = function() {
         });
 
         // Generate new blocks as needed
-        generateBlock();
+        if (timestamp - lastBlockGenerationTime > blockGenerationInterval) {
+            generateBlock();
+            lastBlockGenerationTime = timestamp;
+        }
 
         // Remove blocks that are out of view
         if (blocks.length > 0 && blocks[0].y > canvas.height) {
