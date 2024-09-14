@@ -3,7 +3,7 @@ window.onload = function() {
     const ctx = canvas.getContext('2d');
     const restartButton = document.getElementById('restartButton');
 
-    // Set initial canvas size
+    // Set canvas size to fit the mobile screen
     resizeCanvas();
 
     let isGameOver = false;
@@ -54,8 +54,7 @@ window.onload = function() {
     }
 
     function generateInitialBlocks() {
-        const numberOfBlocks = Math.ceil(canvas.height / blockSpacing);
-        for (let i = 0; i < numberOfBlocks; i++) {
+        for (let i = 0; i < 5; i++) {
             generateBlock(canvas.height - i * blockSpacing);
         }
     }
@@ -225,11 +224,7 @@ window.onload = function() {
         requestAnimationFrame(gameLoop);
     });
 
-    window.addEventListener('resize', function() {
-        resizeCanvas();
-        resetGame(); // Regenerate blocks when resizing the canvas
-        requestAnimationFrame(gameLoop);
-    });
+    window.addEventListener('resize', resizeCanvas);
 
     function resizeCanvas() {
         canvas.width = window.innerWidth;
