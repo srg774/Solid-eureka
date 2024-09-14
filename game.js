@@ -60,7 +60,8 @@ window.onload = function() {
     }
 
     function generateInitialBlocks() {
-        for (let i = 0; i < 5; i++) {
+        const numberOfBlocks = Math.ceil(canvas.height / blockSpacing);
+        for (let i = 0; i < numberOfBlocks; i++) {
             generateBlock(canvas.height - i * blockSpacing);
         }
     }
