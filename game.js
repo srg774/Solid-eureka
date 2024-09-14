@@ -6,124 +6,131 @@ window.onload = function () {
     let isGameOver = false;
     let gameSpeed = 1;
     let score = 0;
-    let restartDelay = 1000; // Delay before restart after game over
 
     // Player variables
     const playerWidth = 64;
-    const playerHeight = 96;
+    const playerHeight = 64; // Adjust the player's size for flying
     const playerSpeed = 5;
-    const gravity = 0.5;
-    const jumpPower = -10;
-    let isJumping = false;
-    let yVelocity = 0;
-    let currentPlayerImage = null;
+    let playerX, playerY;
+    let isMovingUp = false;
+    let isMovingDown = false;
+    let isMovingLeft = false;
+    let isMovingRight = false;
 
-    // Load images
-    const playerImageL = new Image();
-    const playerImageR = new Image();
-    playerImageL.src = 'sprite_sheet_L.png';
-    playerImageR.src = 'sprite_sheet_R.png';
+    // Load player images
+    const playerImage = new Image();
+    playerImage.src = 'sprite_sheet_R.png'; // Assume this image shows the character flying
+
+    // Icons for collection
+    const emailIcon = new Image();
+    const messageIcon = new Image();
+    emailIcon.src = 'email_icon.png'; // Replace with the path to your email icon
+    messageIcon.src = 'message_icon.png'; // Replace with the path to your message icon
+
+    const icons = []; // Array to hold the collectible icons
 
     // Ensure images are loaded before starting the game loop
     let imagesLoaded = 0;
-    playerImageL.onload = function () {
+    playerImage.onload = checkAllImagesLoaded;
+    emailIcon.onload = checkAllImagesLoaded;
+    messageIcon.onload = checkAllImagesLoaded;
+
+    function checkAllImagesLoaded() {
         imagesLoaded++;
-        if (imagesLoaded === 2) {
-            currentPlayerImage = playerImageR; // Default to right-facing image
+        if (imagesLoaded === 3) {
             resetGame();
             gameLoop();
-        }
-    };
-    playerImageR.onload = function () {
-        imagesLoaded++;
-        if (imagesLoaded === 2) {
-            currentPlayerImage = playerImageR; // Default to right-facing image
-            resetGame();
-            gameLoop();
-        }
-    };
-
-    // Player position
-    let playerX, playerY;
-
-    // Platforms
-    const platforms = [];
-    const platformWidth = 100;
-    const platformHeight = 10;
-    const platformCount = 10;
-    const platformGap = 100;
-
-    function generatePlatforms() {
-        platforms.length = 0; // Clear existing platforms
-        for (let i = 0; i < platformCount; i++) {
-            platforms.push({
-                x: Math.random() * (canvas.width - platformWidth),
-                y: canvas.height - (i * platformGap) - platformHeight,
-            });
         }
     }
 
+    // Reset game state
     function resetGame() {
         isGameOver = false;
-        gameSpeed = 0.5; // Start slower
+        gameSpeed = 1;
         score = 0;
-
-        // Reset player position
         playerX = canvas.width / 2 - playerWidth / 2;
-        playerY = canvas.height - playerHeight - 10;
-        yVelocity = 0;
-        isJumping = false;
+        playerY = canvas.height / 2 - playerHeight / 2;
+        icons.length = 0; // Clear existing icons
+        generateIcons(); // Add new icons
+    }
 
-        // Generate platforms
-        generatePlatforms();
+    // Generate random icons
+    function generateIcons() {
+        for (let i = 0; i < 5; i++) {
+            addNewIcon();
+        }
+    }
+
+    // Add a new icon at a random position
+    function addNewIcon() {
+        const iconType = Math.random() > 0.5 ? emailIcon : messageIcon; // Randomly select the icon
+        icons.push({
+            image: iconType,
+            x: Math.random() * (canvas.width - 32),
+            y: Math.random() * (canvas.height - 32),
+            width: 32,
+            height: 32,
+        });
     }
 
     // Event listeners for keyboard controls
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'ArrowLeft') {
-            currentPlayerImage = playerImageL;
-            playerX -= playerSpeed; // Move left
-        }
-        if (e.key === 'ArrowRight') {
-            currentPlayerImage = playerImageR;
-            playerX += playerSpeed; // Move right
-        }
-        if (e.key === ' ' && !isGameOver) {
-            isJumping = true;
-            yVelocity = jumpPower; // Jump
-        }
+        if (e.key === 'ArrowUp') isMovingUp = true;
+        if (e.key === 'ArrowDown') isMovingDown = true;
+        if (e.key === 'ArrowLeft') isMovingLeft = true;
+        if (e.key === 'ArrowRight') isMovingRight = true;
+    });
+
+    document.addEventListener('keyup', function (e) {
+        if (e.key === 'ArrowUp') isMovingUp = false;
+        if (e.key === 'ArrowDown') isMovingDown = false;
+        if (e.key === 'ArrowLeft') isMovingLeft = false;
+        if (e.key === 'ArrowRight') isMovingRight = false;
     });
 
     // Mobile touch controls
-    document.addEventListener('touchstart', function (e) {
-        if (!isGameOver) {
-            isJumping = true;
-            yVelocity = jumpPower; // Jump
-        }
-    });
+    document.addEventListener('touchstart', handleTouch);
+    document.addEventListener('touchmove', handleTouch);
 
-    // Check collision with platforms
-    function checkPlatformCollision() {
-        platforms.forEach(platform => {
-            if (playerX < platform.x + platformWidth &&
-                playerX + playerWidth > platform.x &&
-                playerY + playerHeight >= platform.y &&
-                playerY + playerHeight <= platform.y + platformHeight + yVelocity) {
-                // Collision detected - player lands on platform
-                playerY = platform.y - playerHeight;
-                yVelocity = 0; // Stop falling
-                isJumping = false;
-                score += 1; // Increase score
-                gameSpeed += 0.02; // Increase difficulty
-            }
-        });
+    function handleTouch(e) {
+        const touch = e.touches[0];
+        const touchX = touch.clientX;
+        const touchY = touch.clientY;
+
+        // Set directions based on touch position relative to the player
+        isMovingUp = touchY < playerY;
+        isMovingDown = touchY > playerY;
+        isMovingLeft = touchX < playerX;
+        isMovingRight = touchX > playerX;
     }
 
-    // Check if the player falls below the screen
+    document.addEventListener('touchend', function () {
+        // Stop movement on touch end
+        isMovingUp = isMovingDown = isMovingLeft = isMovingRight = false;
+    });
+
+    // Check collision with icons
+    function checkIconCollision() {
+        for (let i = 0; i < icons.length; i++) {
+            const icon = icons[i];
+            if (playerX < icon.x + icon.width &&
+                playerX + playerWidth > icon.x &&
+                playerY < icon.y + icon.height &&
+                playerY + playerHeight > icon.y) {
+                // Collision detected
+                icons.splice(i, 1); // Remove the icon
+                score += 1; // Increase score
+                gameSpeed += 0.05; // Increase difficulty
+                addNewIcon(); // Add a new icon
+                break;
+            }
+        }
+    }
+
+    // Check if the player flies off the screen
     function checkGameOver() {
-        if (playerY > canvas.height || playerY < 0) {
+        if (playerX < 0 || playerX + playerWidth > canvas.width || playerY < 0 || playerY + playerHeight > canvas.height) {
             isGameOver = true;
-            setTimeout(resetGame, restartDelay); // Restart the game after a short delay
         }
     }
 
@@ -137,46 +144,28 @@ window.onload = function () {
             return; // Stop the game loop
         }
 
-        // Apply gravity
-        yVelocity += gravity;
-        playerY += yVelocity;
+        // Move the player
+        if (isMovingUp) playerY -= playerSpeed * gameSpeed;
+        if (isMovingDown) playerY += playerSpeed * gameSpeed;
+        if (isMovingLeft) playerX -= playerSpeed * gameSpeed;
+        if (isMovingRight) playerX += playerSpeed * gameSpeed;
 
         // Check for collisions
-        checkPlatformCollision();
+        checkIconCollision();
         checkGameOver();
-
-        // Keep player within screen bounds horizontally
-        if (playerX < 0) {
-            playerX = 0;
-        }
-        if (playerX + playerWidth > canvas.width) {
-            playerX = canvas.width - playerWidth;
-        }
 
         // Clear the canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Draw platforms
-        ctx.fillStyle = '#8B4513';
-        platforms.forEach(platform => {
-            ctx.fillRect(platform.x, platform.y, platformWidth, platformHeight);
-            platform.y += gameSpeed; // Move platforms down
-            if (platform.y > canvas.height) { // Recycle platform
-                platform.y = -platformHeight;
-                platform.x = Math.random() * (canvas.width - platformWidth);
-            }
+        // Draw icons
+        icons.forEach(icon => {
+            ctx.drawImage(icon.image, icon.x, icon.y, icon.width, icon.height);
         });
 
         // Draw player
-        ctx.drawImage(currentPlayerImage, 0, 0, playerWidth, playerHeight, playerX, playerY, playerWidth, playerHeight);
+        ctx.drawImage(playerImage, playerX, playerY, playerWidth, playerHeight);
 
         // Request next frame
         requestAnimationFrame(gameLoop);
     }
 };
-
-
-
-
-
-
