@@ -4,7 +4,7 @@ window.onload = function () {
 
     // Game variables
     let isGameOver = false;
-    let gameSpeed = 2; // Initial scrolling speed
+    let gameSpeed = 1; // Initial scrolling speed
     let score = 0;
 
     // Player variables
@@ -12,41 +12,54 @@ window.onload = function () {
     const playerHeight = 64;
     const playerSpeed = 5;
     let playerX, playerY;
-    let isMovingUp = false;
-    let isMovingDown = false;
     let isMovingLeft = false;
     let isMovingRight = false;
 
-    // Load player image
-    const playerImage = new Image();
-    playerImage.src = 'sprite_sheet_R.png'; // Assume this image shows the character flying
+    // Load player images for left and right movement
+    const playerImageRight = new Image();
+    playerImageRight.src = 'sprite_sheet_R.png';
+    const playerImageLeft = new Image();
+    playerImageLeft.src = 'sprite_sheet_L.png';
+    let currentPlayerImage = playerImageRight;
 
     // Blocks
     const blocks = [];
     const blockSize = 50;
+    const blockSpacing = 200; // Distance between blocks
 
-    // Ensure the player image is loaded before starting the game loop
-    playerImage.onload = function () {
-        resetGame();
-        gameLoop();
+    // Ensure the player images are loaded before starting the game loop
+    let imagesLoaded = 0;
+    playerImageRight.onload = playerImageLeft.onload = function () {
+        imagesLoaded++;
+        if (imagesLoaded === 2) {
+            resetGame();
+            gameLoop();
+        }
     };
 
     // Reset game state
     function resetGame() {
         isGameOver = false;
-        gameSpeed = 2;
+        gameSpeed = 1;
         score = 0;
         playerX = canvas.width / 2 - playerWidth / 2;
-        playerY = canvas.height / 2 - playerHeight / 2;
+        playerY = canvas.height - playerHeight;
         blocks.length = 0; // Clear existing blocks
-        generateBlock(); // Add the first block
+        generateInitialBlocks();
     }
 
-    // Generate a new block at a random position
-    function generateBlock() {
+    // Generate initial blocks
+    function generateInitialBlocks() {
+        for (let i = 0; i < 5; i++) {
+            generateBlock(canvas.height - i * blockSpacing);
+        }
+    }
+
+    // Generate a new block at a specified y position
+    function generateBlock(y) {
         const block = {
-            x: canvas.width, // Start off-screen
-            y: Math.random() * (canvas.height - blockSize),
+            x: Math.random() * (canvas.width - blockSize),
+            y: y,
             width: blockSize,
             height: blockSize,
             color: 'blue'
@@ -56,15 +69,17 @@ window.onload = function () {
 
     // Event listeners for keyboard controls
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'ArrowUp') isMovingUp = true;
-        if (e.key === 'ArrowDown') isMovingDown = true;
-        if (e.key === 'ArrowLeft') isMovingLeft = true;
-        if (e.key === 'ArrowRight') isMovingRight = true;
+        if (e.key === 'ArrowLeft') {
+            isMovingLeft = true;
+            currentPlayerImage = playerImageLeft;
+        }
+        if (e.key === 'ArrowRight') {
+            isMovingRight = true;
+            currentPlayerImage = playerImageRight;
+        }
     });
 
     document.addEventListener('keyup', function (e) {
-        if (e.key === 'ArrowUp') isMovingUp = false;
-        if (e.key === 'ArrowDown') isMovingDown = false;
         if (e.key === 'ArrowLeft') isMovingLeft = false;
         if (e.key === 'ArrowRight') isMovingRight = false;
     });
@@ -76,18 +91,22 @@ window.onload = function () {
     function handleTouch(e) {
         const touch = e.touches[0];
         const touchX = touch.clientX;
-        const touchY = touch.clientY;
 
-        // Set directions based on touch position relative to the player
-        isMovingUp = touchY < playerY;
-        isMovingDown = touchY > playerY;
-        isMovingLeft = touchX < playerX;
-        isMovingRight = touchX > playerX;
+        // Move player to the left or right based on touch position
+        if (touchX < canvas.width / 2) {
+            isMovingLeft = true;
+            isMovingRight = false;
+            currentPlayerImage = playerImageLeft;
+        } else {
+            isMovingRight = true;
+            isMovingLeft = false;
+            currentPlayerImage = playerImageRight;
+        }
     }
 
     document.addEventListener('touchend', function () {
         // Stop movement on touch end
-        isMovingUp = isMovingDown = isMovingLeft = isMovingRight = false;
+        isMovingLeft = isMovingRight = false;
     });
 
     // Check collision with blocks
@@ -101,16 +120,16 @@ window.onload = function () {
                 // Collision detected
                 block.color = 'green'; // Change color to indicate success
                 score += 1; // Increase score
-                gameSpeed += 0.1; // Increase difficulty
-                generateBlock(); // Add a new block
+                gameSpeed += 0.1; // Gradually increase scrolling speed
+                generateBlock(block.y - blockSpacing); // Add a new block above
                 break;
             }
         }
     }
 
-    // Check if the player flies off the screen
+    // Check if the player falls off the screen
     function checkGameOver() {
-        if (playerX < 0 || playerX + playerWidth > canvas.width || playerY < 0 || playerY + playerHeight > canvas.height) {
+        if (playerY > canvas.height || playerY + playerHeight < 0) {
             isGameOver = true;
         }
     }
@@ -126,19 +145,21 @@ window.onload = function () {
         }
 
         // Move the player
-        if (isMovingUp) playerY -= playerSpeed;
-        if (isMovingDown) playerY += playerSpeed;
         if (isMovingLeft) playerX -= playerSpeed;
         if (isMovingRight) playerX += playerSpeed;
 
-        // Move blocks to the left to create the scrolling effect
+        // Prevent player from moving out of bounds
+        if (playerX < 0) playerX = 0;
+        if (playerX + playerWidth > canvas.width) playerX = canvas.width - playerWidth;
+
+        // Move blocks and scroll screen
         blocks.forEach(block => {
-            block.x -= gameSpeed;
+            block.y += gameSpeed;
         });
 
         // Remove blocks that have moved off the screen
         blocks.forEach((block, index) => {
-            if (block.x + block.width < 0) {
+            if (block.y > canvas.height) {
                 blocks.splice(index, 1);
             }
         });
@@ -157,7 +178,7 @@ window.onload = function () {
         });
 
         // Draw player
-        ctx.drawImage(playerImage, playerX, playerY, playerWidth, playerHeight);
+        ctx.drawImage(currentPlayerImage, playerX, playerY, playerWidth, playerHeight);
 
         // Request next frame
         requestAnimationFrame(gameLoop);
