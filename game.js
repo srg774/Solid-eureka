@@ -168,6 +168,7 @@ window.onload = function() {
         // Check if any block has moved out of the canvas without being hit
         blocks.forEach(block => {
             if (block.y > canvas.height && !block.hit) {
+                // Game over if a blue block is missed
                 isGameOver = true;
             }
         });
@@ -201,17 +202,13 @@ window.onload = function() {
             block.y += gameSpeed;
         });
 
-        // Remove blocks that have moved out of view
-        if (blocks.length > 0 && blocks[0].y > canvas.height) {
-            blocks.shift();
-        }
-
         // Generate new blocks continuously
         generateBlock();
 
-        checkGameOver();
-        checkBlockCollision();
+        checkGameOver(); // Check for game over before rendering the frame
+        checkBlockCollision(); // Check collisions
 
+        // Clear the canvas for the new frame
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // Draw blocks
