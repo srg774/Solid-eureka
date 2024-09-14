@@ -20,6 +20,8 @@ window.onload = function() {
     let playerX, playerY;
     let canJump = true; // Flag to track if jumping is allowed
     let jumpRequested = false; // Flag to track if jump is requested
+    const jumpDebounceTime = 200; // Time in milliseconds to debounce jump requests
+    let lastJumpTime = 0; // Timestamp of the last jump request
 
     const playerImageRight = new Image();
     playerImageRight.src = 'sprite_sheet_R.png';
@@ -84,7 +86,11 @@ window.onload = function() {
             playerVelocityX = playerSpeed;
             currentPlayerImage = playerImageRight;
         } else if ((event.key === 'ArrowUp' || event.key === ' ') && canJump && !jumpRequested) { // Jump on Up Arrow or Spacebar
-            jumpRequested = true;
+            let currentTime = new Date().getTime();
+            if (currentTime - lastJumpTime > jumpDebounceTime) {
+                jumpRequested = true;
+                lastJumpTime = currentTime;
+            }
         }
     });
 
@@ -107,7 +113,11 @@ window.onload = function() {
             isTouchingRight = true;
         }
         if (canJump && !jumpRequested) {
-            jumpRequested = true;
+            let currentTime = new Date().getTime();
+            if (currentTime - lastJumpTime > jumpDebounceTime) {
+                jumpRequested = true;
+                lastJumpTime = currentTime;
+            }
         }
     });
 
