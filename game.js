@@ -188,12 +188,13 @@ window.onload = function() {
         if (playerX < 0) playerX = 0;
         if (playerX + playerWidth > canvas.width) playerX = canvas.width - playerWidth;
 
-        checkGameOver();
-
         // Move blocks and scroll screen
         blocks.forEach(block => {
             block.y += gameSpeed;
         });
+
+        // Check game over conditions
+        checkGameOver();
 
         // Generate new blocks as needed
         if (timestamp - lastBlockGenerationTime > blockGenerationInterval) {
@@ -201,11 +202,15 @@ window.onload = function() {
             lastBlockGenerationTime = timestamp;
         }
 
-        // Remove blocks that are out of view
+        // Remove blocks that are out of view and check for missed blocks
         if (blocks.length > 0 && blocks[blocks.length - 1].y > canvas.height) {
-            blocks.shift();
+            blocks.shift(); // Remove the block from the array
         }
 
+        // Check if any block that has been removed was missed
+        checkGameOver();
+
+        // Check collisions with remaining blocks
         checkBlockCollision();
 
         // Clear the canvas
