@@ -51,8 +51,8 @@ window.onload = function () {
         gameSpeed = 0.5;
         score = 0;
         playerX = canvas.width / 2 - playerWidth / 2;
-        playerY = canvas.height - playerHeight - 10;
-        playerVelocityY = 0;
+        playerY = -playerHeight; // Start from above the canvas
+        playerVelocityY = 1; // Initial gentle falling speed
         blocks.length = 0; // Clear existing blocks
         generateInitialBlocks();
     }
@@ -194,6 +194,11 @@ window.onload = function () {
             block.y += gameSpeed;
         });
 
+        // Generate new blocks as needed
+        if (blocks.length === 0 || blocks[blocks.length - 1].y > canvas.height - blockSpacing) {
+            generateBlock(-blockHeight); // Generate a new block at the top
+        }
+
         // Remove blocks that are out of view
         if (blocks.length > 0 && blocks[0].y > canvas.height) {
             blocks.shift(); // Remove the first block
@@ -219,3 +224,4 @@ window.onload = function () {
         requestAnimationFrame(gameLoop);
     }
 };
+
