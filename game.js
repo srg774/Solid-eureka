@@ -157,7 +157,9 @@ window.onload = function() {
                 block.color = 'green'; 
                 block.hit = true; 
                 score += 1;
-                gameSpeed += 0.01;
+                if (gameSpeed < maxSpeed) { // Ensuring gameSpeed doesn't exceed maxSpeed
+                    gameSpeed += 0.01;
+                }
             }
         });
     }
@@ -215,17 +217,23 @@ window.onload = function() {
         }
 
         checkGameOver();
-
         checkBlockCollision();
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // Draw the blocks
         blocks.forEach(block => {
             ctx.fillStyle = block.color;
             ctx.fillRect(block.x, block.y, block.width, block.height);
         });
 
+        // Draw the player
         ctx.drawImage(currentPlayerImage, playerX, playerY, playerWidth, playerHeight);
+
+        // Draw the score at the top left
+        ctx.fillStyle = 'black';
+        ctx.font = '20px Arial';
+        ctx.fillText('Score: ' + score, 10, 30);
 
         requestAnimationFrame(gameLoop);
     }
