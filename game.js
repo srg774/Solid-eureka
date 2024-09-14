@@ -11,6 +11,7 @@ window.onload = function() {
     let gravity = 0.2;
     let playerVelocityY = 0;
     let playerVelocityX = 0;
+    let missedBlocks = 0; // Track missed blocks
 
     const playerWidth = 30;
     const playerHeight = 30;
@@ -43,6 +44,7 @@ window.onload = function() {
         isGameOver = false;
         gameSpeed = 0.5;
         score = 0;
+        missedBlocks = 0;
         playerX = canvas.width / 2 - playerWidth / 2;
         playerY = canvas.height / 2 - playerHeight / 2;
         playerVelocityY = 0;
@@ -146,12 +148,20 @@ window.onload = function() {
                 score += 1;
                 // Gradually increase game speed
                 gameSpeed += 0.01;
+                missedBlocks = 0; // Reset missed blocks count
             }
         });
     }
 
     function checkGameOver() {
-        if (playerY > canvas.height) {
+        // End game if a block is missed
+        if (missedBlocks >= 3) {
+            isGameOver = true;
+            ctx.fillStyle = 'black';
+            ctx.font = '30px Arial';
+            ctx.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
+            ctx.fillText('Score: ' + score, canvas.width / 2 - 50, canvas.height / 2 + 40);
+        } else if (playerY > canvas.height) {
             isGameOver = true;
             ctx.fillStyle = 'black';
             ctx.font = '30px Arial';
@@ -197,6 +207,7 @@ window.onload = function() {
         // Remove blocks that are out of view
         if (blocks.length > 0 && blocks[blocks.length - 1].y > canvas.height) {
             blocks.shift();
+            missedBlocks++; // Increment missed blocks count
         }
 
         checkBlockCollision();
