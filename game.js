@@ -82,8 +82,10 @@ window.onload = function() {
         } else if (event.key === 'ArrowRight') {
             playerVelocityX = playerSpeed;
             currentPlayerImage = playerImageRight;
-        } else if ((event.key === 'ArrowUp' || event.key === ' ') && canJump) { // Jump on Up Arrow or Spacebar
-            jumpRequested = true;
+        } else if (event.key === 'ArrowUp' || event.key === ' ') { // Jump on Up Arrow or Spacebar
+            if (canJump && !jumpRequested) {
+                jumpRequested = true;
+            }
         }
     });
 
@@ -105,7 +107,7 @@ window.onload = function() {
         } else {
             isTouchingRight = true;
         }
-        if (canJump) {
+        if (canJump && !jumpRequested) {
             jumpRequested = true;
         }
     });
