@@ -82,8 +82,8 @@ window.onload = function() {
         } else if (event.key === 'ArrowRight') {
             playerVelocityX = playerSpeed;
             currentPlayerImage = playerImageRight;
-        } else if (event.key === 'ArrowUp' || event.key === ' ') { // Jump on Up Arrow or Spacebar
-            if (canJump && !jumpRequested) {
+        } else if ((event.key === 'ArrowUp' || event.key === ' ') && canJump) { // Jump on Up Arrow or Spacebar
+            if (!jumpRequested) {
                 jumpRequested = true;
             }
         }
