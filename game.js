@@ -48,22 +48,22 @@ window.onload = function() {
         playerY = canvas.height / 2 - playerHeight / 2;
         playerVelocityY = 0;
         playerVelocityX = 0;
-        blocks.length = 0;
-        generateInitialBlocks();
+        blocks.length = 0; // Clear existing blocks
+        generateInitialBlocks(); // Generate initial blocks
         restartButton.style.display = 'none';
     }
 
     function generateInitialBlocks() {
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 5; i++) { // Generate 5 blocks initially
             generateBlock(canvas.height - i * blockSpacing);
         }
     }
 
-    function generateBlock() {
+    function generateBlock(initialY = -blockHeight) {
         if (blocks.length === 0 || blocks[blocks.length - 1].y > blockSpacing) {
             const block = {
                 x: Math.random() * (canvas.width - blockWidth),
-                y: -blockHeight,
+                y: initialY, // Set initial Y position
                 width: blockWidth,
                 height: blockHeight,
                 color: 'blue',
@@ -219,15 +219,4 @@ window.onload = function() {
         requestAnimationFrame(gameLoop);
     }
 
-    restartButton.addEventListener('click', function() {
-        resetGame();
-        requestAnimationFrame(gameLoop);
-    });
-
-    window.addEventListener('resize', resizeCanvas);
-
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-};
+    restartButton.addEventListener(
