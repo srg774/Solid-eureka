@@ -18,6 +18,7 @@ window.onload = function() {
     const jumpStrength = 4; // Reduced bounce strength
     const maxSpeed = 5;
     let playerX, playerY;
+    let canJump = true; // Flag to track if jumping is allowed
 
     const playerImageRight = new Image();
     playerImageRight.src = 'sprite_sheet_R.png';
@@ -49,6 +50,7 @@ window.onload = function() {
         playerVelocityX = 0;
         blocks.length = 0;
         generateInitialBlocks();
+        canJump = true; // Reset the jump flag
     }
 
     function generateInitialBlocks() {
@@ -79,7 +81,7 @@ window.onload = function() {
         } else if (event.key === 'ArrowRight') {
             playerVelocityX = playerSpeed;
             currentPlayerImage = playerImageRight;
-        } else if (event.key === 'ArrowUp' || event.key === ' ') { // Jump on Up Arrow or Spacebar
+        } else if ((event.key === 'ArrowUp' || event.key === ' ') && canJump) { // Jump on Up Arrow or Spacebar
             jump();
         }
     });
@@ -93,6 +95,7 @@ window.onload = function() {
     // Mobile Controls
     let isTouchingLeft = false;
     let isTouchingRight = false;
+    let touchJumpAllowed = true; // Flag for mobile jump
 
     canvas.addEventListener('touchstart', function(e) {
         e.preventDefault();
@@ -102,13 +105,17 @@ window.onload = function() {
         } else {
             isTouchingRight = true;
         }
-        jump(); // Trigger jump on touch start
+        if (touchJumpAllowed) {
+            jump();
+            touchJumpAllowed = false; // Prevent continuous jumping
+        }
     });
 
     canvas.addEventListener('touchend', function(e) {
         isTouchingLeft = false;
         isTouchingRight = false;
         playerVelocityX = 0;
+        touchJumpAllowed = true; // Allow jump on next touch start
     });
 
     canvas.addEventListener('touchmove', function(e) {
@@ -129,7 +136,11 @@ window.onload = function() {
     }
 
     function jump() {
-        playerVelocityY = -jumpStrength;
+        if (canJump) {
+            playerVelocityY = -jumpStrength;
+            playerY += playerVelocityY; // Adjust player position immediately for a jump
+            canJump = false; // Prevent continuous jumping
+        }
     }
 
     function checkBlockCollision() {
@@ -148,6 +159,7 @@ window.onload = function() {
                 score += 1;
                 // Gradually increase game speed
                 gameSpeed += 0.01;
+                canJump = true; // Allow jump again after hitting a block
             }
         });
     }
