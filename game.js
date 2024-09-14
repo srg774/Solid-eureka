@@ -165,6 +165,7 @@ window.onload = function() {
             isGameOver = true;
         }
 
+        // Check if any block has moved out of the canvas without being hit
         blocks.forEach(block => {
             if (block.y > canvas.height && !block.hit) {
                 isGameOver = true;
