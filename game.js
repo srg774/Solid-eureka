@@ -92,13 +92,12 @@ window.onload = function() {
     function jump() {
         if (canJump || playerVelocityY > 0) {
             playerVelocityY = -jumpStrength;
-            canJump = false;
+            canJump = false; // Disable jumping until player lands
         }
     }
 
     function checkBlockCollision() {
         let landed = false;
-        canJump = false;
         for (let i = 0; i < blocks.length; i++) {
             const block = blocks[i];
             if (
@@ -118,7 +117,7 @@ window.onload = function() {
             }
         }
         if (!landed) {
-            canJump = false; // If no block collision, player cannot jump
+            canJump = false; // Player is in mid-air, can't jump
         }
     }
 
@@ -178,10 +177,9 @@ window.onload = function() {
     }
 
     canvas.addEventListener('touchstart', function(e) {
+        e.preventDefault(); // Prevent default touch behavior
         const touch = e.touches[0];
-        const touchX = touch.clientX;
-        const touchY = touch.clientY;
-        if (touchX < canvas.width / 2) {
+        if (touch.clientX < canvas.width / 2) {
             playerVelocityX = -playerSpeed;
             currentPlayerImage = playerImageLeft;
         } else {
@@ -195,7 +193,10 @@ window.onload = function() {
     });
 
     canvas.addEventListener('touchmove', function(e) {
-        e.preventDefault();
+        e.preventDefault(); // Prevent default scrolling
+    });
+
+    canvas.addEventListener('touchstart', function(e) {
+        jump();
     });
 };
-
