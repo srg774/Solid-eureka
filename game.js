@@ -1,118 +1,113 @@
-// game.js
-
-// Set up the canvas and context
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// Canvas size
-canvas.width = 800;
-canvas.height = 400;
+// Initialize canvas size
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-// Player properties
-const player = {
-    x: 50,
-    y: canvas.height - 60,
+let player = {
+    x: canvas.width / 2 - 25,
+    y: canvas.height - 50,
     width: 50,
     height: 50,
     speed: 5,
-    dx: 0,
-    dy: 0,
-    gravity: 0.5,
-    jumpPower: -10,
-    grounded: false,
+    velocityY: 0,
+    jumping: false,
+    flying: false,
+    crouching: false
 };
 
-// Platforms
-const platforms = [
-    { x: 0, y: canvas.height - 10, width: canvas.width, height: 10 }, // ground
-    { x: 200, y: canvas.height - 80, width: 100, height: 10 }, // platform 1
-    { x: 400, y: canvas.height - 150, width: 100, height: 10 }, // platform 2
+let platforms = [
+    { x: 0, y: canvas.height - 30, width: canvas.width, height: 30 } // Ground
 ];
 
-// Key press handlers
-const keys = {
-    right: false,
-    left: false,
-    up: false,
-};
+const gravity = 0.8;
+const jumpStrength = -15;
 
-// Event listeners for key presses
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight') keys.right = true;
-    if (e.key === 'ArrowLeft') keys.left = true;
-    if (e.key === 'ArrowUp' && player.grounded) {
-        player.dy = player.jumpPower;
-        player.grounded = false;
-    }
-});
-
-document.addEventListener('keyup', (e) => {
-    if (e.key === 'ArrowRight') keys.right = false;
-    if (e.key === 'ArrowLeft') keys.left = false;
-});
-
-// Update player position
-function update() {
-    // Horizontal movement
-    if (keys.right) player.dx = player.speed;
-    else if (keys.left) player.dx = -player.speed;
-    else player.dx = 0;
-
-    player.x += player.dx;
-
-    // Vertical movement (gravity)
-    player.dy += player.gravity;
-    player.y += player.dy;
-
-    // Collision detection with platforms
-    player.grounded = false;
-    for (let platform of platforms) {
-        if (
-            player.x < platform.x + platform.width &&
-            player.x + player.width > platform.x &&
-            player.y < platform.y + platform.height &&
-            player.y + player.height > platform.y
-        ) {
-            // Collision detected
-            player.grounded = true;
-            player.dy = 0;
-            player.y = platform.y - player.height;
-        }
-    }
-
-    // Prevent falling off the canvas
-    if (player.y > canvas.height - player.height) {
-        player.y = canvas.height - player.height;
-        player.dy = 0;
-        player.grounded = true;
-    }
-
-    // Prevent moving off the canvas horizontally
-    if (player.x < 0) player.x = 0;
-    if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
-}
-
-// Draw player and platforms
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw player
+function drawPlayer() {
     ctx.fillStyle = 'red';
     ctx.fillRect(player.x, player.y, player.width, player.height);
+}
 
-    // Draw platforms
-    ctx.fillStyle = 'green';
-    for (let platform of platforms) {
+function drawPlatforms() {
+    ctx.fillStyle = 'black';
+    platforms.forEach(platform => {
         ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+    });
+}
+
+function updatePlayer() {
+    // Apply gravity
+    if (!player.flying) {
+        player.velocityY += gravity;
+    } else {
+        player.velocityY = 0;
+    }
+
+    player.y += player.velocityY;
+
+    // Platform collision detection
+    platforms.forEach(platform => {
+        if (player.y + player.height > platform.y && player.y + player.height < platform.y + platform.height &&
+            player.x + player.width > platform.x && player.x < platform.x + platform.width) {
+            player.y = platform.y - player.height;
+            player.velocityY = 0;
+            player.jumping = false;
+        }
+    });
+
+    // Ensure player stays within canvas bounds
+    if (player.y + player.height > canvas.height) {
+        player.y = canvas.height - player.height;
+        player.velocityY = 0;
     }
 }
 
-// Main game loop
-function loop() {
-    update();
-    draw();
-    requestAnimationFrame(loop);
+function handleInput() {
+    if (keys['ArrowRight']) {
+        player.x += player.speed;
+    }
+    if (keys['ArrowLeft']) {
+        player.x -= player.speed;
+    }
+    if (keys['Space'] && !player.jumping) {
+        player.velocityY = jumpStrength;
+        player.jumping = true;
+    }
+    if (keys['ArrowDown']) {
+        player.crouching = true;
+        player.height = 25; // Crouch height
+    } else {
+        player.crouching = false;
+        player.height = 50; // Default height
+    }
+    if (keys['F']) {
+        player.flying = true;
+    } else {
+        player.flying = false;
+    }
 }
 
-// Start the game
-loop();
+let keys = {};
+document.addEventListener('keydown', (e) => {
+    keys[e.key] = true;
+});
+document.addEventListener('keyup', (e) => {
+    keys[e.key] = false;
+});
+
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    updatePlayer();
+    drawPlatforms();
+    drawPlayer();
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+
+// Handle window resizing
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
