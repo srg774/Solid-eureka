@@ -224,5 +224,3 @@ window.onload = function () {
         requestAnimationFrame(gameLoop);
     }
 };
-
-
