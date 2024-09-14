@@ -8,7 +8,7 @@ window.onload = function () {
 
     // Game variables
     let isGameOver = false;
-    let gameSpeed = 0.5; // Slower initial scrolling speed
+    let gameSpeed = 0.5; // Initial scrolling speed
     let score = 0;
     let gravity = 0.1; // Gravity to pull the player down
     let playerVelocityY = 0; // Player's vertical velocity
@@ -17,7 +17,7 @@ window.onload = function () {
     // Player variables
     const playerWidth = 30; // Smaller player sprite for mobile
     const playerHeight = 30;
-    const playerSpeed = 0.5; // Acceleration for flight controls
+    const playerSpeed = 0.5; // Speed of horizontal movement
     const maxSpeed = 2; // Max speed for the player
     let playerX, playerY;
     let isFlying = false;
@@ -33,7 +33,7 @@ window.onload = function () {
     const blocks = [];
     const blockWidth = 50; // Adjust block size for mobile
     const blockHeight = 15;
-    const blockSpacing = 150; // Space between blocks
+    const blockSpacing = 200; // Space between blocks to make it easier
 
     // Ensure the player images are loaded before starting the game loop
     let imagesLoaded = 0;
@@ -59,14 +59,14 @@ window.onload = function () {
 
     // Generate initial blocks
     function generateInitialBlocks() {
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < 5; i++) {
             generateBlock(canvas.height - i * blockSpacing);
         }
     }
 
     // Generate a new block at a specified y position
     function generateBlock(y) {
-        if (y > canvas.height / 2) {
+        if (y > -blockHeight) {
             const block = {
                 x: Math.random() * (canvas.width - blockWidth),
                 y: y,
@@ -147,7 +147,7 @@ window.onload = function () {
                 block.color = 'green'; // Change color to indicate success
                 score += 1; // Increase score
                 gameSpeed += 0.05; // Gradually increase scrolling speed
-                generateBlock(block.y - blockSpacing); // Add a new block above
+                generateBlock(canvas.height); // Add a new block above
                 break;
             }
         }
@@ -194,6 +194,11 @@ window.onload = function () {
             block.y += gameSpeed;
         });
 
+        // Remove blocks that are out of view
+        if (blocks.length > 0 && blocks[0].y > canvas.height) {
+            blocks.shift(); // Remove the first block
+        }
+
         // Check for collisions
         checkBlockCollision();
         checkGameOver();
@@ -214,4 +219,3 @@ window.onload = function () {
         requestAnimationFrame(gameLoop);
     }
 };
-
