@@ -29,6 +29,7 @@ window.onload = function() {
     const blockWidth = 50;
     const blockHeight = 15;
     const blockSpacing = 200;
+    const blockVisibilityDuration = 2000; // Duration a block is visible in milliseconds
 
     let imagesLoaded = 0;
     playerImageRight.onload = playerImageLeft.onload = function() {
@@ -65,7 +66,8 @@ window.onload = function() {
                 width: blockWidth,
                 height: blockHeight,
                 color: 'blue',
-                hit: false
+                hit: false,
+                spawnTime: Date.now()
             };
             blocks.push(block);
         }
@@ -108,18 +110,21 @@ window.onload = function() {
     }
 
     function checkGameOver() {
-        if (playerY > canvas.height) {
-            isGameOver = true;
-            return;
-        }
+        const now = Date.now();
+        let blockMissed = false;
 
         blocks.forEach(block => {
             if (block.y > canvas.height && !block.hit) {
-                isGameOver = true;
+                blockMissed = true;
+            }
+
+            if (now - block.spawnTime > blockVisibilityDuration && !block.hit && block.y <= canvas.height) {
+                blockMissed = true;
             }
         });
 
-        if (isGameOver) {
+        if (blockMissed || playerY > canvas.height) {
+            isGameOver = true;
             ctx.fillStyle = 'black';
             ctx.font = '30px Arial';
             ctx.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
