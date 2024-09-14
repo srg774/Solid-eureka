@@ -6,6 +6,7 @@ window.onload = function () {
     let isGameOver = false;
     let gameSpeed = 1;
     let score = 0;
+    let restartDelay = 1000; // Delay before restart after game over
 
     // Player variables
     const playerWidth = 64;
@@ -81,27 +82,24 @@ window.onload = function () {
     document.addEventListener('keydown', function (e) {
         if (e.key === 'ArrowLeft') {
             currentPlayerImage = playerImageL;
+            playerX -= playerSpeed; // Move left
         }
         if (e.key === 'ArrowRight') {
             currentPlayerImage = playerImageR;
+            playerX += playerSpeed; // Move right
         }
-        if (e.key === ' ' && !isJumping && !isGameOver) {
+        if (e.key === ' ' && !isGameOver) {
             isJumping = true;
-            yVelocity = jumpPower;
+            yVelocity = jumpPower; // Jump
         }
     });
 
     // Mobile touch controls
-    const controls = {
-        jump: false
-    };
-
     document.addEventListener('touchstart', function (e) {
-        controls.jump = true;
-    });
-
-    document.addEventListener('touchend', function () {
-        controls.jump = false;
+        if (!isGameOver) {
+            isJumping = true;
+            yVelocity = jumpPower; // Jump
+        }
     });
 
     // Check collision with platforms
@@ -113,18 +111,19 @@ window.onload = function () {
                 playerY + playerHeight <= platform.y + platformHeight + yVelocity) {
                 // Collision detected - player lands on platform
                 playerY = platform.y - playerHeight;
-                yVelocity = jumpPower; // Bounce upwards
-                isJumping = true;
+                yVelocity = 0; // Stop falling
+                isJumping = false;
                 score += 1; // Increase score
                 gameSpeed += 0.02; // Increase difficulty
             }
         });
     }
 
-    // Check if the player falls below the screen or hits their head
+    // Check if the player falls below the screen
     function checkGameOver() {
         if (playerY > canvas.height || playerY < 0) {
             isGameOver = true;
+            setTimeout(resetGame, restartDelay); // Restart the game after a short delay
         }
     }
 
@@ -135,18 +134,7 @@ window.onload = function () {
             ctx.font = '30px Arial';
             ctx.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
             ctx.fillText('Score: ' + score, canvas.width / 2 - 50, canvas.height / 2 + 40);
-            ctx.font = '20px Arial';
-            ctx.fillText('Press Space to Restart', canvas.width / 2 - 100, canvas.height / 2 + 80);
-            if (isJumping || controls.jump) { // Restart condition
-                resetGame();
-            }
             return; // Stop the game loop
-        }
-
-        // Only move player up when jumping
-        if (controls.jump && !isJumping) {
-            isJumping = true;
-            yVelocity = jumpPower;
         }
 
         // Apply gravity
@@ -186,6 +174,7 @@ window.onload = function () {
         requestAnimationFrame(gameLoop);
     }
 };
+
 
 
 
