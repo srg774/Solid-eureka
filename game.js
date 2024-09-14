@@ -15,7 +15,7 @@ window.onload = function() {
     const playerWidth = 30;
     const playerHeight = 30;
     const playerSpeed = 2;
-    const jumpStrength = 8;
+    const jumpStrength = 4; // Reduced bounce strength
     const maxSpeed = 5;
     let playerX, playerY;
 
@@ -105,7 +105,8 @@ window.onload = function() {
                 playerY = block.y - playerHeight;
                 block.color = 'green';
                 score += 1;
-                gameSpeed += 0.05;
+                // Gradually increase game speed
+                gameSpeed += 0.01;
             }
         });
     }
@@ -175,16 +176,94 @@ window.onload = function() {
         requestAnimationFrame(gameLoop);
     }
 
+    let isTouchingLeft = false;
+    let isTouchingRight = false;
+
     canvas.addEventListener('touchstart', function(e) {
         e.preventDefault();
+        const touch = e.touches[0];
+        if (touch.clientX < canvas.width / 2) {
+            isTouchingLeft = true;
+        } else {
+            isTouchingRight = true;
+        }
         jump(); // Trigger jump on touch start
     });
 
     canvas.addEventListener('touchend', function(e) {
+        isTouchingLeft = false;
+        isTouchingRight = false;
         playerVelocityX = 0;
     });
 
     canvas.addEventListener('touchmove', function(e) {
         e.preventDefault();
     });
+
+    function updateMobileControls() {
+        if (isTouchingLeft) {
+            playerVelocityX = -playerSpeed;
+            currentPlayerImage = playerImageLeft;
+        } else if (isTouchingRight) {
+            playerVelocityX = playerSpeed;
+            currentPlayerImage = playerImageRight;
+        } else {
+            playerVelocityX = 0;
+        }
+    }
+
+    function gameLoop(timestamp) {
+        if (isGameOver) {
+            return;
+        }
+
+        updateMobileControls(); // Update mobile controls
+
+        // Apply gravity
+        playerVelocityY += gravity;
+        if (playerVelocityY > maxSpeed) playerVelocityY = maxSpeed;
+
+        // Move the player
+        playerY += playerVelocityY;
+        playerX += playerVelocityX;
+
+        // Prevent player from moving out of bounds
+        if (playerX < 0) playerX = 0;
+        if (playerX + playerWidth > canvas.width) playerX = canvas.width - playerWidth;
+
+        // Move blocks and scroll screen
+        blocks.forEach(block => {
+            block.y += gameSpeed;
+        });
+
+        // Generate new blocks as needed
+        if (timestamp - lastBlockGenerationTime > blockGenerationInterval) {
+            generateBlock();
+            lastBlockGenerationTime = timestamp;
+        }
+
+        // Remove blocks that are out of view
+        if (blocks.length > 0 && blocks[blocks.length - 1].y > canvas.height) {
+            blocks.shift();
+        }
+
+        checkBlockCollision();
+        checkGameOver();
+
+        // Clear the canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw blocks
+        blocks.forEach(block => {
+            ctx.fillStyle = block.color;
+            ctx.fillRect(block.x, block.y, block.width, block.height);
+        });
+
+        // Draw player
+        ctx.drawImage(currentPlayerImage, playerX, playerY, playerWidth, playerHeight);
+
+        // Request next frame
+        requestAnimationFrame(gameLoop);
+    }
 };
+
