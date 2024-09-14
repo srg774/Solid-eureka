@@ -74,6 +74,7 @@ window.onload = function() {
     }
 
     // Variables to manage jump state
+    let jumpRequested = false;
     let jumpAllowed = true;
 
     // Touch and keyboard controls
@@ -165,10 +166,8 @@ window.onload = function() {
             isGameOver = true;
         }
 
-        // Check if any block has moved out of the canvas without being hit
         blocks.forEach(block => {
             if (block.y > canvas.height && !block.hit) {
-                // Game over if a blue block is missed
                 isGameOver = true;
             }
         });
@@ -197,30 +196,26 @@ window.onload = function() {
         if (playerX + playerWidth > canvas.width) playerX = canvas.width - playerWidth;
         if (playerY < 0) playerY = 0;
 
-        // Move and update blocks
         blocks.forEach(block => {
             block.y += gameSpeed;
         });
 
-        // Generate new blocks continuously
-        generateBlock();
+        if (blocks.length > 0 && blocks[blocks.length - 1].y > canvas.height) {
+            blocks.shift();
+        }
 
-        checkGameOver(); // Check for game over before rendering the frame
-        checkBlockCollision(); // Check collisions
+        checkGameOver();
+        checkBlockCollision();
 
-        // Clear the canvas for the new frame
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Draw blocks
         blocks.forEach(block => {
             ctx.fillStyle = block.color;
             ctx.fillRect(block.x, block.y, block.width, block.height);
         });
 
-        // Draw player
         ctx.drawImage(currentPlayerImage, playerX, playerY, playerWidth, playerHeight);
 
-        // Request the next frame
         requestAnimationFrame(gameLoop);
     }
 
