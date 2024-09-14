@@ -1,113 +1,127 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// Initialize canvas size
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.width = 800;
+canvas.height = 600;
 
-let player = {
-    x: canvas.width / 2 - 25,
-    y: canvas.height - 50,
-    width: 50,
-    height: 50,
+// Load sprite sheets
+const playerImageL = new Image();
+const playerImageR = new Image();
+playerImageL.src = 'assets/sprite_sheet_L.png';
+playerImageR.src = 'assets/sprite_sheet_R.png';
+
+playerImageL.onload = () => console.log('Left sprite loaded');
+playerImageR.onload = () => console.log('Right sprite loaded');
+
+// Player properties
+const player = {
+    x: 50,
+    y: canvas.height - 150,
+    width: 64,
+    height: 96,
+    frameX: 0,
+    frameY: 0,
     speed: 5,
     velocityY: 0,
     jumping: false,
-    flying: false,
-    crouching: false
+    facingRight: true
 };
 
-let platforms = [
-    { x: 0, y: canvas.height - 30, width: canvas.width, height: 30 } // Ground
-];
+// Gravity and jump strength
+const gravity = 0.5;
+const jumpStrength = -12;
 
-const gravity = 0.8;
-const jumpStrength = -15;
+// Platform for player to stand on
+const platform = {
+    x: 0,
+    y: canvas.height - 50,
+    width: canvas.width,
+    height: 50
+};
 
+// Keys
+const keys = {
+    right: false,
+    left: false,
+    jump: false
+};
+
+// Draw player
 function drawPlayer() {
-    ctx.fillStyle = 'red';
-    ctx.fillRect(player.x, player.y, player.width, player.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw platform
+    ctx.fillStyle = '#654321'; // Brown color for the platform
+    ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+
+    // Determine which sprite sheet to use
+    const sprite = player.facingRight ? playerImageR : playerImageL;
+    ctx.drawImage(sprite, player.frameX * player.width, player.frameY * player.height, player.width, player.height, player.x, player.y, player.width, player.height);
 }
 
-function drawPlatforms() {
-    ctx.fillStyle = 'black';
-    platforms.forEach(platform => {
-        ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
-    });
-}
-
+// Update player
 function updatePlayer() {
-    // Apply gravity
-    if (!player.flying) {
-        player.velocityY += gravity;
-    } else {
-        player.velocityY = 0;
-    }
-
-    player.y += player.velocityY;
-
-    // Platform collision detection
-    platforms.forEach(platform => {
-        if (player.y + player.height > platform.y && player.y + player.height < platform.y + platform.height &&
-            player.x + player.width > platform.x && player.x < platform.x + platform.width) {
-            player.y = platform.y - player.height;
-            player.velocityY = 0;
-            player.jumping = false;
-        }
-    });
-
-    // Ensure player stays within canvas bounds
-    if (player.y + player.height > canvas.height) {
-        player.y = canvas.height - player.height;
-        player.velocityY = 0;
-    }
-}
-
-function handleInput() {
-    if (keys['ArrowRight']) {
+    // Horizontal movement
+    if (keys.right) {
         player.x += player.speed;
-    }
-    if (keys['ArrowLeft']) {
+        player.facingRight = true;
+    } else if (keys.left) {
         player.x -= player.speed;
+        player.facingRight = false;
     }
-    if (keys['Space'] && !player.jumping) {
+
+    // Jumping
+    if (keys.jump && !player.jumping) {
         player.velocityY = jumpStrength;
         player.jumping = true;
     }
-    if (keys['ArrowDown']) {
-        player.crouching = true;
-        player.height = 25; // Crouch height
-    } else {
-        player.crouching = false;
-        player.height = 50; // Default height
+
+    // Apply gravity
+    player.velocityY += gravity;
+    player.y += player.velocityY;
+
+    // Collision detection with platform
+    if (player.y + player.height > platform.y) {
+        player.y = platform.y - player.height;
+        player.jumping = false;
     }
-    if (keys['F']) {
-        player.flying = true;
+
+    // Animation logic (cycling through frames)
+    if (keys.right || keys.left) {
+        player.frameX = (player.frameX + 1) % 4; // Assuming 4 frames per row
     } else {
-        player.flying = false;
+        player.frameX = 0; // Reset to the first frame when not moving
     }
 }
 
-let keys = {};
-document.addEventListener('keydown', (e) => {
-    keys[e.key] = true;
-});
-document.addEventListener('keyup', (e) => {
-    keys[e.key] = false;
-});
-
+// Game loop
 function gameLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    updatePlayer();
-    drawPlatforms();
     drawPlayer();
+    updatePlayer();
     requestAnimationFrame(gameLoop);
 }
 
+// Event listeners for keyboard controls
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') keys.right = true;
+    if (e.key === 'ArrowLeft') keys.left = true;
+    if (e.key === ' ') keys.jump = true;
+});
+
+document.addEventListener('keyup', (e) => {
+    if (e.key === 'ArrowRight') keys.right = false;
+    if (e.key === 'ArrowLeft') keys.left = false;
+    if (e.key === ' ') keys.jump = false;
+});
+
+// Event listeners for mobile controls
+document.getElementById('leftBtn').addEventListener('touchstart', () => keys.left = true);
+document.getElementById('leftBtn').addEventListener('touchend', () => keys.left = false);
+document.getElementById('rightBtn').addEventListener('touchstart', () => keys.right = true);
+document.getElementById('rightBtn').addEventListener('touchend', () => keys.right = false);
+document.getElementById('jumpBtn').addEventListener('touchstart', () => keys.jump = true);
+document.getElementById('jumpBtn').addEventListener('touchend', () => keys.jump = false);
+
+// Start the game loop
 gameLoop();
 
-// Handle window resizing
-window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-});
