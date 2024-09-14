@@ -64,9 +64,10 @@ window.onload = function() {
         }
     }
 
-    // Generate a new block when the last block is partially off the screen
+    // Generate a new block when the last block is a certain distance from the top
     function generateBlock() {
-        if (blocks.length === 0 || blocks[blocks.length - 1].y + blockHeight >= canvas.height) {
+        // Generate a new block when the last block is a certain distance from the top
+        if (blocks.length === 0 || blocks[blocks.length - 1].y > blockSpacing) {
             const block = {
                 x: Math.random() * (canvas.width - blockWidth),
                 y: -blockHeight,
@@ -79,10 +80,10 @@ window.onload = function() {
     }
 
     // Event listeners for keyboard controls
-    // ... (same as before)
+    // ... (implement as needed)
 
     // Mobile touch controls
-    // ... (same as before)
+    // ... (implement as needed)
 
     // Check for collisions more efficiently
     function checkBlockCollision() {
