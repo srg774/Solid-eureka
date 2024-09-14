@@ -13,16 +13,15 @@ window.onload = function() {
     let gravity = 0.1;
     let playerVelocityY = 0;
     let playerVelocityX = 0;
-    let isJumping = false; // New variable to track if the player is jumping
+    let isJumping = false; // Track if the player is jumping
 
     // Player variables
     const playerWidth = 30;
     const playerHeight = 30;
     const playerSpeed = 2;
-    const jumpStrength = 4; // How strong the jump is
-    const maxSpeed = 2;
+    const jumpStrength = 5; // Strength of the jump
+    const maxSpeed = 5;
     let playerX, playerY;
-    let isFlying = false;
 
     // Load player images for left and right movement
     const playerImageRight = new Image();
@@ -53,8 +52,9 @@ window.onload = function() {
         gameSpeed = 0.5;
         score = 0;
         playerX = canvas.width / 2 - playerWidth / 2;
-        playerY = canvas.height - playerHeight - 100; // Adjust starting position
-        playerVelocityY = 1;
+        playerY = canvas.height - playerHeight - 100; // Starting position
+        playerVelocityY = 0;
+        isJumping = false;
         blocks.length = 0;
         generateInitialBlocks();
     }
@@ -66,7 +66,7 @@ window.onload = function() {
         }
     }
 
-    // Generate a new block when the last block is a certain distance from the top
+    // Generate a new block
     function generateBlock() {
         if (blocks.length === 0 || blocks[blocks.length - 1].y > blockSpacing) {
             const block = {
@@ -80,15 +80,15 @@ window.onload = function() {
         }
     }
 
-    // Event listeners for keyboard controls
+    // Keyboard controls
     document.addEventListener('keydown', function(event) {
         if (event.key === 'ArrowLeft') {
             playerVelocityX = -playerSpeed;
-            currentPlayerImage = playerImageLeft; // Switch to left image
+            currentPlayerImage = playerImageLeft;
         } else if (event.key === 'ArrowRight') {
             playerVelocityX = playerSpeed;
-            currentPlayerImage = playerImageRight; // Switch to right image
-        } else if (event.key === 'ArrowUp' || event.key === ' ') { // ArrowUp or spacebar to jump
+            currentPlayerImage = playerImageRight;
+        } else if (event.key === 'ArrowUp' || event.key === ' ') { // ArrowUp or spacebar for jump
             jump();
         }
     });
@@ -101,72 +101,29 @@ window.onload = function() {
 
     // Jump function
     function jump() {
-        // Allow jump only if not already jumping or falling
-        if (!isJumping && playerVelocityY === 0) {
-            playerVelocityY = -jumpStrength;
-            isJumping = true;
+        // Only jump if not already jumping
+        if (!isJumping) {
+            playerVelocityY = -jumpStrength; // Jumping gives an upward force
+            isJumping = true; // Set jumping state to true
         }
     }
-
-    // Add touch controls for mobile devices
-    const leftButton = document.createElement('button');
-    leftButton.innerHTML = 'Left';
-    leftButton.style.position = 'absolute';
-    leftButton.style.bottom = '20px';
-    leftButton.style.left = '20px';
-    document.body.appendChild(leftButton);
-
-    const rightButton = document.createElement('button');
-    rightButton.innerHTML = 'Right';
-    rightButton.style.position = 'absolute';
-    rightButton.style.bottom = '20px';
-    rightButton.style.right = '20px';
-    document.body.appendChild(rightButton);
-
-    const jumpButton = document.createElement('button');
-    jumpButton.innerHTML = 'Jump';
-    jumpButton.style.position = 'absolute';
-    jumpButton.style.bottom = '20px';
-    jumpButton.style.left = '50%';
-    jumpButton.style.transform = 'translateX(-50%)';
-    document.body.appendChild(jumpButton);
-
-    // Event listeners for touch controls
-    leftButton.addEventListener('touchstart', function() {
-        playerVelocityX = -playerSpeed;
-        currentPlayerImage = playerImageLeft;
-    });
-
-    leftButton.addEventListener('touchend', function() {
-        playerVelocityX = 0;
-    });
-
-    rightButton.addEventListener('touchstart', function() {
-        playerVelocityX = playerSpeed;
-        currentPlayerImage = playerImageRight;
-    });
-
-    rightButton.addEventListener('touchend', function() {
-        playerVelocityX = 0;
-    });
-
-    jumpButton.addEventListener('touchstart', function() {
-        jump();
-    });
 
     // Check for collisions more efficiently
     function checkBlockCollision() {
         for (let i = 0; i < blocks.length; i++) {
             const block = blocks[i];
-            if (playerX + playerWidth > block.x &&
+            // Check if the player is landing on the block
+            if (
+                playerX + playerWidth > block.x &&
                 playerX < block.x + blockWidth &&
                 playerY + playerHeight >= block.y &&
-                playerY + playerHeight <= block.y + blockHeight) { // Adjust collision for landing on block
+                playerY + playerHeight <= block.y + blockHeight + playerVelocityY // Adjust collision for landing
+            ) {
                 // Collision detected - land on the block
-                playerVelocityY = 0;
-                playerY = block.y - playerHeight;
+                playerVelocityY = 0; // Stop downward movement
+                playerY = block.y - playerHeight; // Set player on top of the block
                 isJumping = false; // Allow jumping again
-                block.color = 'green';
+                block.color = 'green'; // Change block color
                 score += 1;
                 gameSpeed += 0.05;
                 break;
@@ -191,16 +148,11 @@ window.onload = function() {
             return;
         }
 
-        // Apply gravity if not flying
-        if (!isFlying) {
-            playerVelocityY += gravity;
-        } else {
-            playerVelocityY -= 0.5;
-        }
+        // Apply gravity
+        playerVelocityY += gravity;
 
-        // Cap the player's speed
+        // Cap the player's falling speed
         if (playerVelocityY > maxSpeed) playerVelocityY = maxSpeed;
-        if (playerVelocityY < -maxSpeed) playerVelocityY = -maxSpeed;
 
         // Move the player
         playerY += playerVelocityY;
