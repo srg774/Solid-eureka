@@ -70,6 +70,7 @@ window.onload = function() {
         }
     }
 
+    // Desktop Controls
     document.addEventListener('keydown', function(event) {
         if (event.key === 'ArrowLeft') {
             playerVelocityX = -playerSpeed;
@@ -87,6 +88,43 @@ window.onload = function() {
             playerVelocityX = 0;
         }
     });
+
+    // Mobile Controls
+    let isTouchingLeft = false;
+    let isTouchingRight = false;
+
+    canvas.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        if (touch.clientX < canvas.width / 2) {
+            isTouchingLeft = true;
+        } else {
+            isTouchingRight = true;
+        }
+        jump(); // Trigger jump on touch start
+    });
+
+    canvas.addEventListener('touchend', function(e) {
+        isTouchingLeft = false;
+        isTouchingRight = false;
+        playerVelocityX = 0;
+    });
+
+    canvas.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+    });
+
+    function updateMobileControls() {
+        if (isTouchingLeft) {
+            playerVelocityX = -playerSpeed;
+            currentPlayerImage = playerImageLeft;
+        } else if (isTouchingRight) {
+            playerVelocityX = playerSpeed;
+            currentPlayerImage = playerImageRight;
+        } else {
+            playerVelocityX = 0;
+        }
+    }
 
     function jump() {
         playerVelocityY = -jumpStrength;
@@ -129,95 +167,8 @@ window.onload = function() {
             return;
         }
 
-        // Apply gravity
-        playerVelocityY += gravity;
-        if (playerVelocityY > maxSpeed) playerVelocityY = maxSpeed;
-
-        // Move the player
-        playerY += playerVelocityY;
-        playerX += playerVelocityX;
-
-        // Prevent player from moving out of bounds
-        if (playerX < 0) playerX = 0;
-        if (playerX + playerWidth > canvas.width) playerX = canvas.width - playerWidth;
-
-        // Move blocks and scroll screen
-        blocks.forEach(block => {
-            block.y += gameSpeed;
-        });
-
-        // Generate new blocks as needed
-        if (timestamp - lastBlockGenerationTime > blockGenerationInterval) {
-            generateBlock();
-            lastBlockGenerationTime = timestamp;
-        }
-
-        // Remove blocks that are out of view
-        if (blocks.length > 0 && blocks[blocks.length - 1].y > canvas.height) {
-            blocks.shift();
-        }
-
-        checkBlockCollision();
-        checkGameOver();
-
-        // Clear the canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Draw blocks
-        blocks.forEach(block => {
-            ctx.fillStyle = block.color;
-            ctx.fillRect(block.x, block.y, block.width, block.height);
-        });
-
-        // Draw player
-        ctx.drawImage(currentPlayerImage, playerX, playerY, playerWidth, playerHeight);
-
-        // Request next frame
-        requestAnimationFrame(gameLoop);
-    }
-
-    let isTouchingLeft = false;
-    let isTouchingRight = false;
-
-    canvas.addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        const touch = e.touches[0];
-        if (touch.clientX < canvas.width / 2) {
-            isTouchingLeft = true;
-        } else {
-            isTouchingRight = true;
-        }
-        jump(); // Trigger jump on touch start
-    });
-
-    canvas.addEventListener('touchend', function(e) {
-        isTouchingLeft = false;
-        isTouchingRight = false;
-        playerVelocityX = 0;
-    });
-
-    canvas.addEventListener('touchmove', function(e) {
-        e.preventDefault();
-    });
-
-    function updateMobileControls() {
-        if (isTouchingLeft) {
-            playerVelocityX = -playerSpeed;
-            currentPlayerImage = playerImageLeft;
-        } else if (isTouchingRight) {
-            playerVelocityX = playerSpeed;
-            currentPlayerImage = playerImageRight;
-        } else {
-            playerVelocityX = 0;
-        }
-    }
-
-    function gameLoop(timestamp) {
-        if (isGameOver) {
-            return;
-        }
-
-        updateMobileControls(); // Update mobile controls
+        // Update mobile controls
+        updateMobileControls();
 
         // Apply gravity
         playerVelocityY += gravity;
@@ -266,4 +217,5 @@ window.onload = function() {
         requestAnimationFrame(gameLoop);
     }
 };
+
 
