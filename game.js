@@ -152,10 +152,6 @@ window.onload = function() {
     function checkGameOver() {
         if (playerY > canvas.height) {
             isGameOver = true;
-            ctx.fillStyle = 'black';
-            ctx.font = '30px Arial';
-            ctx.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
-            ctx.fillText('Score: ' + score, canvas.width / 2 - 50, canvas.height / 2 + 40);
         }
     }
 
@@ -164,7 +160,13 @@ window.onload = function() {
 
     function gameLoop(timestamp) {
         if (isGameOver) {
-            return;
+            // Draw game over screen
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'black';
+            ctx.font = '30px Arial';
+            ctx.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
+            ctx.fillText('Score: ' + score, canvas.width / 2 - 50, canvas.height / 2 + 40);
+            return; // Stop further processing
         }
 
         updateControls();
@@ -175,9 +177,11 @@ window.onload = function() {
         playerY += playerVelocityY;
         playerX += playerVelocityX;
 
-        // Prevent player from moving out of bounds
+        // Prevent player from moving out of bounds on top, left, and right
         if (playerX < 0) playerX = 0;
         if (playerX + playerWidth > canvas.width) playerX = canvas.width - playerWidth;
+
+        checkGameOver();
 
         // Move blocks and scroll screen
         blocks.forEach(block => {
@@ -194,17 +198,20 @@ window.onload = function() {
         }
 
         checkBlockCollision();
-        checkGameOver();
 
+        // Clear the canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // Draw blocks
         blocks.forEach(block => {
             ctx.fillStyle = block.color;
             ctx.fillRect(block.x, block.y, block.width, block.height);
         });
 
+        // Draw player
         ctx.drawImage(currentPlayerImage, playerX, playerY, playerWidth, playerHeight);
 
+        // Request next frame
         requestAnimationFrame(gameLoop);
     }
 };
