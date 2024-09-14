@@ -3,14 +3,8 @@ window.onload = function() {
     const ctx = canvas.getContext('2d');
     const restartButton = document.getElementById('restartButton');
 
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        resetGame(); // Reset the game to adjust the initial positions
-    }
-
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas(); // Initial call to set the canvas size
+    canvas.width = 800;
+    canvas.height = 600;
 
     let isGameOver = false;
     let gameSpeed = 0.5;
@@ -60,8 +54,7 @@ window.onload = function() {
     }
 
     function generateInitialBlocks() {
-        const numberOfBlocks = Math.ceil(canvas.height / blockSpacing);
-        for (let i = 0; i < numberOfBlocks; i++) {
+        for (let i = 0; i < 5; i++) {
             generateBlock(canvas.height - i * blockSpacing);
         }
     }
