@@ -1,10 +1,9 @@
 window.onload = function() {
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    const restartButton = document.getElementById('restartButton');
 
-    canvas.width = 800;
-    canvas.height = 600;
+    canvas.width = 480;
+    canvas.height = 800;
 
     let isGameOver = false;
     let gameSpeed = 0.5;
@@ -50,7 +49,6 @@ window.onload = function() {
         playerVelocityX = 0;
         blocks.length = 0;
         generateInitialBlocks();
-        restartButton.style.display = 'none'; // Hide the restart button
     }
 
     function generateInitialBlocks() {
@@ -74,7 +72,8 @@ window.onload = function() {
         }
     }
 
-    let jumpRequested = false;
+    // Desktop Controls
+    let jumpRequested = false; // Track if jump is requested
 
     document.addEventListener('keydown', function(event) {
         if (event.key === 'ArrowLeft') {
@@ -83,10 +82,10 @@ window.onload = function() {
         } else if (event.key === 'ArrowRight') {
             playerVelocityX = playerSpeed;
             currentPlayerImage = playerImageRight;
-        } else if (event.key === 'ArrowUp' || event.key === ' ') { 
+        } else if (event.key === 'ArrowUp' || event.key === ' ') { // Jump on Up Arrow or Spacebar
             if (!jumpRequested) {
                 jump();
-                jumpRequested = true;
+                jumpRequested = true; // Set flag to prevent long presses
             }
         }
     });
@@ -94,14 +93,15 @@ window.onload = function() {
     document.addEventListener('keyup', function(event) {
         if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
             playerVelocityX = 0;
-        } else if (event.key === 'ArrowUp' || event.key === ' ') {
+        } else if (event.key === 'ArrowUp' || event.key === ' ') { // Reset jump request on key release
             jumpRequested = false;
         }
     });
 
+    // Mobile Controls
     let isTouchingLeft = false;
     let isTouchingRight = false;
-    let jumpRequestedTouch = false;
+    let jumpRequestedTouch = false; // Track if jump is requested by touch
 
     canvas.addEventListener('touchstart', function(e) {
         e.preventDefault();
@@ -113,7 +113,7 @@ window.onload = function() {
         }
         if (!jumpRequestedTouch) {
             jump();
-            jumpRequestedTouch = true;
+            jumpRequestedTouch = true; // Set flag to prevent long presses
         }
     });
 
@@ -121,7 +121,7 @@ window.onload = function() {
         isTouchingLeft = false;
         isTouchingRight = false;
         playerVelocityX = 0;
-        jumpRequestedTouch = false;
+        jumpRequestedTouch = false; // Reset jump request on touch end
     });
 
     canvas.addEventListener('touchmove', function(e) {
@@ -163,13 +163,15 @@ window.onload = function() {
     }
 
     function checkGameOver() {
+        // Check if player has fallen below the screen
         if (playerY > canvas.height) {
             isGameOver = true;
         }
 
+        // Check if any block has been missed
         blocks.forEach(block => {
             if (block.y > canvas.height && !block.hit) {
-                block.missed = true;
+                block.missed = true; // Mark the block as missed
                 isGameOver = true;
             }
         });
@@ -185,8 +187,7 @@ window.onload = function() {
             ctx.font = '30px Arial';
             ctx.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
             ctx.fillText('Score: ' + score, canvas.width / 2 - 50, canvas.height / 2 + 40);
-            restartButton.style.display = 'block'; // Show the restart button
-            return; 
+            return; // Stop further processing
         }
 
         updateControls();
@@ -197,41 +198,49 @@ window.onload = function() {
         playerY += playerVelocityY;
         playerX += playerVelocityX;
 
+        // Prevent player from moving out of bounds on top, left, and right
         if (playerX < 0) playerX = 0;
         if (playerX + playerWidth > canvas.width) playerX = canvas.width - playerWidth;
-        if (playerY < 0) playerY = 0;
+        if (playerY < 0) playerY = 0; // Prevent player from going above the top
 
+        // Move blocks and scroll screen
         blocks.forEach(block => {
             block.y += gameSpeed;
         });
 
+        // Check game over conditions
+        checkGameOver();
+
+        // Generate new blocks as needed
         if (timestamp - lastBlockGenerationTime > blockGenerationInterval) {
             generateBlock();
             lastBlockGenerationTime = timestamp;
         }
 
+        // Remove blocks that are out of view
         if (blocks.length > 0 && blocks[blocks.length - 1].y > canvas.height) {
-            blocks.shift();
+            blocks.shift(); // Remove the block from the array
         }
 
+        // Check if any block that has been removed was missed
         checkGameOver();
 
+        // Check collisions with remaining blocks
         checkBlockCollision();
 
+        // Clear the canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // Draw blocks
         blocks.forEach(block => {
             ctx.fillStyle = block.color;
             ctx.fillRect(block.x, block.y, block.width, block.height);
         });
 
+        // Draw player
         ctx.drawImage(currentPlayerImage, playerX, playerY, playerWidth, playerHeight);
 
+        // Request next frame
         requestAnimationFrame(gameLoop);
     }
-
-    restartButton.addEventListener('click', function() {
-        resetGame();
-        requestAnimationFrame(gameLoop);
-    });
 };
