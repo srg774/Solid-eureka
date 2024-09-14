@@ -66,7 +66,6 @@ window.onload = function() {
 
     // Generate a new block when the last block is a certain distance from the top
     function generateBlock() {
-        // Generate a new block when the last block is a certain distance from the top
         if (blocks.length === 0 || blocks[blocks.length - 1].y > blockSpacing) {
             const block = {
                 x: Math.random() * (canvas.width - blockWidth),
@@ -80,10 +79,21 @@ window.onload = function() {
     }
 
     // Event listeners for keyboard controls
-    // ... (implement as needed)
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'ArrowLeft') {
+            playerVelocityX = -playerSpeed;
+            currentPlayerImage = playerImageLeft; // Switch to left image
+        } else if (event.key === 'ArrowRight') {
+            playerVelocityX = playerSpeed;
+            currentPlayerImage = playerImageRight; // Switch to right image
+        }
+    });
 
-    // Mobile touch controls
-    // ... (implement as needed)
+    document.addEventListener('keyup', function(event) {
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+            playerVelocityX = 0;
+        }
+    });
 
     // Check for collisions more efficiently
     function checkBlockCollision() {
