@@ -11,7 +11,6 @@ window.onload = function() {
     let gravity = 0.2;
     let playerVelocityY = 0;
     let playerVelocityX = 0;
-    let isJumping = false; // Flag to check if player is jumping
 
     const playerWidth = 30;
     const playerHeight = 30;
@@ -48,7 +47,6 @@ window.onload = function() {
         playerY = canvas.height / 2 - playerHeight / 2;
         playerVelocityY = 0;
         playerVelocityX = 0;
-        isJumping = false;
         blocks.length = 0;
         generateInitialBlocks();
     }
@@ -82,18 +80,13 @@ window.onload = function() {
             playerVelocityX = playerSpeed;
             currentPlayerImage = playerImageRight;
         } else if (event.key === 'ArrowUp' || event.key === ' ') { // Jump on Up Arrow or Spacebar
-            if (!isJumping) { // Only allow jump if not already jumping
-                jump();
-                isJumping = true;
-            }
+            jump();
         }
     });
 
     document.addEventListener('keyup', function(event) {
         if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
             playerVelocityX = 0;
-        } else if (event.key === 'ArrowUp' || event.key === ' ') {
-            isJumping = false; // Allow jumping again when key is released
         }
     });
 
@@ -109,17 +102,13 @@ window.onload = function() {
         } else {
             isTouchingRight = true;
         }
-        if (!isJumping) { // Only allow jump if not already jumping
-            jump();
-            isJumping = true;
-        }
+        jump(); // Trigger jump on touch start
     });
 
     canvas.addEventListener('touchend', function(e) {
         isTouchingLeft = false;
         isTouchingRight = false;
         playerVelocityX = 0;
-        isJumping = false; // Allow jumping again when touch ends
     });
 
     canvas.addEventListener('touchmove', function(e) {
@@ -159,7 +148,6 @@ window.onload = function() {
                 score += 1;
                 // Gradually increase game speed
                 gameSpeed += 0.01;
-                isJumping = false; // Reset jumping flag when hitting block
             }
         });
     }
