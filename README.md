@@ -24,7 +24,8 @@ Happy gaming!
 Intial development of the game play mechanics
 - ![Screenshot 2024-09-16](https://github.com/srg774/solid-eureka/blob/main/info/Screenshot%202024-09-16%2014.30.30.png)
 - ![Platform Masters Screenshot](https://kylekukshtel.com/platform-master)
-- Platform Masters screenshot. Source: https://kylekukshtel.com/platform-master
+- - Platform Masters screenshot. Source: https://kylekukshtel.com/platform-master
+
 - ![Frame Set Sheet (Enlarged)](https://github.com/srg774/solid-eureka/blob/main/info/guy%20(2).png)
 - Frame set sheet. Source: https://opengameart.org/users/sogomn
 
