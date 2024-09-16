@@ -21,6 +21,7 @@ Anyway, that’s it. I hope you enjoy it. I think my high score is 199, but I am
 Happy gaming!
 
 
+
 **intial development of the game play mechanics**
 
 ![Screenshot 2024-09-16](https://github.com/srg774/solid-eureka/blob/main/info/Screenshot%202024-09-16%2014.30.30.png)
