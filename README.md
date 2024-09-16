@@ -20,12 +20,12 @@ Anyway, that’s it. I hope you enjoy it. I think my high score is 199, but I am
 
 Happy gaming!
 
-### Screenshots
+### Images
 
 - ![Screenshot 2024-09-16](https://github.com/srg774/solid-eureka/blob/main/info/Screenshot%202024-09-16%2014.30.30.png)
-- ![Sprite Sheet](https://github.com/srg774/solid-eureka/blob/main/info/guy%20(2).png)
+- ![Platform Masters Screenshot](https://kylekukshtel.com/platform-master)
+- ![Frame Set Sheet (Enlarged)](https://github.com/srg774/solid-eureka/blob/main/info/guy%20(2).png)
 
 ### Sources
 
 - Sprite Art: [OpenGameArt - Sogomn](https://opengameart.org/users/sogomn)
-- Platform Masters Screenshot: [Kyle Kukshtel](https://kylekukshtel.com/platform-master)
