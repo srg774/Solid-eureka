@@ -20,15 +20,17 @@ Anyway, that’s it. I hope you enjoy it. I think my high score is 199, but I am
 
 Happy gaming!
 
-![Screenshot 2024-09-16](https://github.com/srg774/solid-eureka/blob/main/info/Screenshot%202024-09-16%2014.30.30.png)
-
 Intial development of the game play mechanics
 
-![Initial Development](https://raw.githubusercontent.com/srg774/solid-eureka/main/info/Screenshot%202024-09-15%2010.11.59.png)
+![Screenshot 2024-09-16](https://github.com/srg774/solid-eureka/blob/main/info/Screenshot%202024-09-16%2014.30.30.png)
 
 Platform Masters screenshot. Source: https://kylekukshtel.com/platform-master
 
-![Frame Set Sheet (Enlarged)](https://github.com/srg774/solid-eureka/blob/main/info/guy%20(2).png)
+![Initial Development](https://raw.githubusercontent.com/srg774/solid-eureka/main/info/Screenshot%202024-09-15%2010.11.59.png)
 
 Frame set sheet. Source: https://opengameart.org/users/sogomn
+
+![Frame Set Sheet (Enlarged)](https://github.com/srg774/solid-eureka/blob/main/info/guy%20(2).png)
+
+
 
