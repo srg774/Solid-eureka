@@ -6,7 +6,7 @@ Recently, I became fascinated by the story of Ryan Evan Kadrian. Watching an ear
 
 This is what encouraged me, one Saturday afternoon, to give it a try myself—with the help of ChatGPT.
 
-The whole endeavor took around 7 hours from start to finish. It wasn't just about producing a single prompt but involved an iterative process. ![Initial Development](https://raw.githubusercontent.com/srg774/solid-eureka/main/info/Screenshot%202024-09-15%2010.11.59.png) I'm going to share the code with a description so we can dissect what's happening. I already knew it was going to be a JavaScript-based game, which reminded me of the early Flash games. When I looked into how to host the game on my site, ChatGPT recommended GitHub to host the necessary files and serve the page, and I already had an account.
+The whole endeavor took around 7 hours from start to finish. It wasn't just about producing a single prompt but involved an iterative process.  I'm going to share the code with a description so we can dissect what's happening. I already knew it was going to be a JavaScript-based game, which reminded me of the early Flash games. When I looked into how to host the game on my site, ChatGPT recommended GitHub to host the necessary files and serve the page, and I already had an account.
 
 I hit a lot of dead ends along the way. For instance, I was aiming for something like Nick's 'Platform Masters' but ended up with something completely different. Of course, it has similarities with other platform games, and I'm sure I could find a similar game if I searched.
 
@@ -20,12 +20,11 @@ Anyway, that’s it. I hope you enjoy it. I think my high score is 199, but I am
 
 Happy gaming!
 
-### Images
-
+![Initial Development](https://raw.githubusercontent.com/srg774/solid-eureka/main/info/Screenshot%202024-09-15%2010.11.59.png)
+Intial development of the game play mechanics
 - ![Screenshot 2024-09-16](https://github.com/srg774/solid-eureka/blob/main/info/Screenshot%202024-09-16%2014.30.30.png)
 - ![Platform Masters Screenshot](https://kylekukshtel.com/platform-master)
+- Platform Masters screenshot. Source: https://kylekukshtel.com/platform-master
 - ![Frame Set Sheet (Enlarged)](https://github.com/srg774/solid-eureka/blob/main/info/guy%20(2).png)
+- Frame set sheet. Source: https://opengameart.org/users/sogomn
 
-### Sources
-
-- Sprite Art: [OpenGameArt - Sogomn](https://opengameart.org/users/sogomn)
