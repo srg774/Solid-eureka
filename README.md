@@ -1,6 +1,6 @@
 # Developing a Cross-Platform Game
 
->>https://srg774.github.io/solid-eureka/<<
+**https://srg774.github.io/solid-eureka/**
 
 The premise behind developing my own game started with an interest in watching others develop theirs. I've watched people like Ben Heck write code in C from scratch and draw out assets one pixel at a time. This approach seems to be the ultimate in 2D game production. While I have watched one or two other developers as well, Ben stands out to me.
 
