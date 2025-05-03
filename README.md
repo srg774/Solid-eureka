@@ -92,10 +92,6 @@ The game includes basic touch support:
 * Save high scores
 * Implement pause/resume
 
----
-
-Let me know if you'd like a markdown copy or want it tailored for GitHub!
-
 
 **Frame set sheet. Source: https://opengameart.org/users/sogomn**
 
