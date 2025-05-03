@@ -2,15 +2,100 @@
 
 **https://srg774.github.io/solid-eureka/**
 
-Some of the hurdles during development included trying to prevent long button presses to limit jumps. I couldn't get the code generated to sort this out without dozens of attempts. The block logic was tricky to pin down in terms of game-over conditions. I also had another hurdle with dynamic canvas resizing. I got it working and it looked good, but it broke the block generation mechanics, so I couldn't implement it. Instead, I set the resolution to match my own mobile device.
+Got it! Here's a **README** specifically tailored for your **first-generation platformer game** (the version you just shared), covering setup, controls, and gameplay:
 
-The touch controls on mobile work pretty well, as do the desktop controls. I hope the game itself is intuitive. The sprite bouncing up and down were entirely ChatGPT's choices, picking what it thought was best. These are, of course, classic 8-bit themes and colors, come to think of it.
+---
 
-The sprite art isn't mine but from a freeware site. I wasted hours trying to get the JavaScript code to animate the sprite using a single frame sheet image, but in the end, I quickly cropped out two images (left and right). That's why one sprite is slightly different; I just quickly picked two frames from the walking animation set. I'm sure there's a program that can deal with these sprite sheets.
+# 🕹️ First-Gen Platformer Game
 
-Anyway, that’s it. I hope you enjoy it. I think my high score is 199, but I am working toward 450, at which point the scrolling speed increases from 0.5 to 5. I've already found a slight glitch to get more points.
+A simple vertical platformer game built with HTML5 Canvas and JavaScript. Control a sprite that jumps between falling platforms. The game speeds up over time and ends when you fall or miss a platform.
 
-Happy gaming!
+## 🚀 Features
+
+* Smooth keyboard and mobile touch controls
+* Animated left/right sprite movement
+* Falling blocks with score system
+* Game over screen with restart functionality
+* Gradual difficulty increase via game speed
+
+---
+
+## 🎮 How to Play
+
+* **Move Left**: `←` arrow key or touch left side of screen
+* **Move Right**: `→` arrow key or touch right side of screen
+* **Jump**: `↑` arrow key or `Spacebar` or tap screen
+* **Restart**: Click the "Restart" button after game over
+
+---
+
+## 🧱 Gameplay Mechanics
+
+* Platforms fall from the top and move downward.
+* Land on platforms to bounce and score points.
+* Green blocks indicate successful landings.
+* If you fall off the screen or miss a platform, it's game over.
+
+---
+
+## 🛠️ Setup Instructions
+
+1. Clone or download the project.
+2. Ensure your project folder includes:
+
+   * `index.html`
+   * `game.js` (or inline script)
+   * `sprite_sheet_R.png`
+   * `sprite_sheet_L.png`
+3. Open `index.html` in your browser.
+
+---
+
+## 📁 File Structure
+
+```
+/your-game-folder
+│
+├── index.html
+├── game.js
+├── sprite_sheet_R.png
+├── sprite_sheet_L.png
+└── styles.css (optional)
+```
+
+---
+
+## 📷 Screenshots (optional)
+
+You can include a few screenshots of:
+
+* Gameplay
+* Game over screen
+* Touch controls overlay
+
+---
+
+## 📱 Mobile Support
+
+The game includes basic touch support:
+
+* Touch left/right side of the canvas to move.
+* Tap to jump.
+
+---
+
+## ✅ To Do (Optional Features)
+
+* Add sound effects
+* Improve platform variety
+* Add power-ups or obstacles
+* Save high scores
+* Implement pause/resume
+
+---
+
+Let me know if you'd like a markdown copy or want it tailored for GitHub!
+
 
 **Frame set sheet. Source: https://opengameart.org/users/sogomn**
 
