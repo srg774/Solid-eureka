@@ -1,6 +1,6 @@
 # Developing a Cross-Platform Game
 
-**https://srg774.github.io/solid-eureka/**
+**https://srg774.github.io/Solid-eureka/**
 
 Got it! Here's a **README** specifically tailored for your **first-generation platformer game** (the version you just shared), covering setup, controls, and gameplay:
 
